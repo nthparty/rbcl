@@ -48,7 +48,7 @@ jobs:
            mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-2.0.0-manylinux1-${{ matrix.PYTHON }}"
+          name: "rbcl-0.2.0-manylinux1-${{ matrix.PYTHON }}"
           path: rbcl-wheelhouse/
   macos:
     runs-on: macOS-latest
@@ -103,42 +103,47 @@ jobs:
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-2.0.0-macOS-${{ matrix.PYTHON.VERSION }}"
+          name: "rbcl-0.2.0-macOS-${{ matrix.PYTHON.VERSION }}"
           path: rbcl-wheelhouse/
-  macos-arm:
-    runs-on: macos-11
+   macos-arm:
+    runs-on: macOS-11
     strategy:
       matrix:
         PYTHON:
           - VERSION: '3.10'
-            ABI_VERSION: 'cp36'
+            ABI_VERSION: '3.6'
             DOWNLOAD_URL: 'https://www.python.org/ftp/python/3.10.1/python-3.10.1-macos11.pkg'
             BIN_PATH: '/Library/Frameworks/Python.framework/Versions/3.10/bin/python3'
     name: "Python ${{ matrix.PYTHON.VERSION }} for ABI ${{ matrix.PYTHON.ABI_VERSION }} on macOS"
     steps:
-      - uses: actions/checkout@v2.4.0
-      - run: |
+      - uses: actions/checkout@v2
+      - name: Install Python.
+        run: |
           curl "$PYTHON_DOWNLOAD_URL" -o python.pkg
           sudo installer -pkg python.pkg -target /
+          ${{ matrix.PYTHON.BIN_PATH }} -m pip install -U virtualenv
+          ${{ matrix.PYTHON.BIN_PATH }} -m virtualenv venv
         env:
           PYTHON_DOWNLOAD_URL: ${{ matrix.PYTHON.DOWNLOAD_URL }}
-      - run: ${{ matrix.PYTHON.BIN_PATH }} -m pip install -U virtualenv
-      - run: ${{ matrix.PYTHON.BIN_PATH }} -m virtualenv venv
-      - run: venv/bin/pip install -U pip wheel cffi
-      - name: Make sdist
-        run: venv/bin/python setup.py sdist
-      - run: tar zxvf dist/rbcl*.tar.gz && mkdir wheelhouse
-      - name: Build the wheel
+      - name: Install Python dependencies for build process.
+        run: venv/bin/pip install -U pip setuptools wheel cffi
+      - name: Download libsodium source tree archive and extract it.
         run: |
-            cd rbcl*
-            LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" \
-                ../venv/bin/python setup.py bdist_wheel --py-limited-api=${{ matrix.PYTHON.ABI_VERSION }} && mv dist/rbcl*.whl ../wheelhouse
+          wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
+          mv libsodium-1.0.18.tar.gz rbcl/libsodium.tar.gz
+      - name: Build wheel file.
+        run: |
+          mkdir wheelhouse
+          REGEX="3\.([0-9])*"
+          if [[ "$PYTHON_VERSION" =~ $REGEX ]]; then
+              PY_LIMITED_API="--py-limited-api=cp3${BASH_REMATCH[1]}"
+          fi
+          rm -f dist/*.*
+          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64 -arch x86_64" ARCHFLAGS="-arch arm64 -arch x86_64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
+              venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+          cp build/lib*/rbcl/_sodium*.so rbcl
         env:
           PYTHON_VERSION: ${{ matrix.PYTHON.ABI_VERSION }}
-          MACOSX_DEPLOYMENT_TARGET: '10.10'
-          CFLAGS: '-arch arm64 -arch x86_64'
-          ARCHFLAGS: '-arch arm64 -arch x86_64'
-          _PYTHON_HOST_PLATFORM: 'macosx-10.9-universal2'
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
@@ -153,7 +158,7 @@ jobs:
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-2.0.0-macOS-arm64-${{ matrix.PYTHON.VERSION }}"
+          name: "rbcl-0.2.0-macOS-${{ matrix.PYTHON.VERSION }}"
           path: rbcl-wheelhouse/
   windows:
     runs-on: windows-latest
@@ -207,5 +212,5 @@ jobs:
           move wheelhouse\rbcl*.whl rbcl-wheelhouse\
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-2.0.0-win-${{ matrix.WINDOWS.ARCH }}-${{ matrix.PYTHON.VERSION }}"
+          name: "rbcl-0.2.0-win-${{ matrix.WINDOWS.ARCH }}-${{ matrix.PYTHON.VERSION }}"
           path: rbcl-wheelhouse\
