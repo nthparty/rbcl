@@ -105,6 +105,56 @@ jobs:
         with:
           name: "rbcl-2.0.0-macOS-${{ matrix.PYTHON.VERSION }}"
           path: rbcl-wheelhouse/
+  macos-arm:
+    runs-on: macos-11
+    strategy:
+      matrix:
+        PYTHON:
+          - VERSION: '3.10'
+            ABI_VERSION: 'cp36'
+            DOWNLOAD_URL: 'https://www.python.org/ftp/python/3.10.1/python-3.10.1-macos11.pkg'
+            BIN_PATH: '/Library/Frameworks/Python.framework/Versions/3.10/bin/python3'
+    name: "Python ${{ matrix.PYTHON.VERSION }} for ABI ${{ matrix.PYTHON.ABI_VERSION }} on macOS"
+    steps:
+      - uses: actions/checkout@v2.4.0
+      - run: |
+          curl "$PYTHON_DOWNLOAD_URL" -o python.pkg
+          sudo installer -pkg python.pkg -target /
+        env:
+          PYTHON_DOWNLOAD_URL: ${{ matrix.PYTHON.DOWNLOAD_URL }}
+      - run: ${{ matrix.PYTHON.BIN_PATH }} -m pip install -U virtualenv
+      - run: ${{ matrix.PYTHON.BIN_PATH }} -m virtualenv venv
+      - run: venv/bin/pip install -U pip wheel cffi
+      - name: Make sdist
+        run: venv/bin/python setup.py sdist
+      - run: tar zxvf dist/rbcl*.tar.gz && mkdir wheelhouse
+      - name: Build the wheel
+        run: |
+            cd rbcl*
+            LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" \
+                ../venv/bin/python setup.py bdist_wheel --py-limited-api=${{ matrix.PYTHON.ABI_VERSION }} && mv dist/rbcl*.whl ../wheelhouse
+        env:
+          PYTHON_VERSION: ${{ matrix.PYTHON.ABI_VERSION }}
+          MACOSX_DEPLOYMENT_TARGET: '10.10'
+          CFLAGS: '-arch arm64 -arch x86_64'
+          ARCHFLAGS: '-arch arm64 -arch x86_64'
+          _PYTHON_HOST_PLATFORM: 'macosx-10.9-universal2'
+      - name: Test wheel installation.
+        run: venv/bin/pip install -f wheelhouse --no-index rbcl
+      - name: Lint and test module (and compiled libsodium shared library file).
+        run: |
+          venv/bin/pip install -U pip pylint coverage nose
+          venv/bin/python -m pylint rbcl # Check against linting rules.
+          venv/bin/python rbcl/rbcl.py -v # Run doctests.
+          venv/bin/python -m nose --cover-erase # Test using nose.
+      - name: Upload wheel file.
+        run: |
+          mkdir rbcl-wheelhouse
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
+      - uses: actions/upload-artifact@v1
+        with:
+          name: "rbcl-2.0.0-macOS-arm64-${{ matrix.PYTHON.VERSION }}"
+          path: rbcl-wheelhouse/
   windows:
     runs-on: windows-latest
     strategy:
