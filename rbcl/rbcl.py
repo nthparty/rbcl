@@ -563,7 +563,7 @@ def crypto_scalarmult_ristretto255_base_allow_scalar_zero(n):
         "unsigned char[]",
         crypto_scalarmult_ristretto255_BYTES)
 
-    _sodium.lib.crypto_scalarmult_ristretto255_base(q, n)  # If -1, then q remains cleared (b'\0'*32).
+    _sodium.lib.crypto_scalarmult_ristretto255_base(q, n) # If -1, then q remains cleared (b'\0'*32)
 
     return _sodium.ffi.buffer(q, crypto_scalarmult_ristretto255_BYTES)[:]
 
