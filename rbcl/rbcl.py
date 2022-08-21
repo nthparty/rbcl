@@ -643,14 +643,6 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
     >>> crypto_scalarmult_ristretto255_allow_scalar_zero(zero_scalar, p) == zero_point
     True
 
-    Example - The scalar being zero does not raise an error, but the point being invalid does:
-
-    >>> invalid_point = b'\1'*32
-    >>> crypto_scalarmult_ristretto255_allow_scalar_zero(zero_scalar, invalid_point)
-    Traceback (most recent call last):
-      ...
-    TypeError: Input must be a 32 long bytes sequence representing a valid Ristretto255 point
-
     :param n: a :py:data:`.crypto_scalarmult_ristretto255_SCALARBYTES` long bytes
               sequence representing a scalar
     :type n: bytes
@@ -661,18 +653,14 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
              :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(n, bytes) or len(
-            n) != crypto_scalarmult_ristretto255_SCALARBYTES:
+    if not isinstance(n, bytes) or len(n) != crypto_scalarmult_ristretto255_SCALARBYTES:
         raise TypeError(
             f"Input must be a {crypto_scalarmult_ristretto255_SCALARBYTES} long bytes sequence"
         )  # pragma: no cover
 
-    if not isinstance(p, bytes) or \
-            len(p) != crypto_scalarmult_ristretto255_BYTES or \
-            not crypto_core_ristretto255_is_valid_point(p):
+    if not isinstance(p, bytes) or len(p) != crypto_scalarmult_ristretto255_BYTES:
         raise TypeError(
             f"Input must be a {crypto_scalarmult_ristretto255_BYTES} long bytes sequence"
-            f" representing a valid Ristretto255 point"
         )  # pragma: no cover
 
     q = _sodium.ffi.new(
