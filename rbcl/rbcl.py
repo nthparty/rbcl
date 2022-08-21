@@ -532,6 +532,42 @@ def crypto_scalarmult_ristretto255_base(n):
     return _sodium.ffi.buffer(q, crypto_scalarmult_ristretto255_BYTES)[:]
 
 
+def crypto_scalarmult_ristretto255_base_allow_scalar_zero(n):
+    """
+    Computes and returns the scalar product of a standard group element and an
+    integer ``n`` on the ristretto255 curve.  Zero-valued scalars are allowed.
+
+    >>> s = crypto_core_ristretto255_scalar_random()
+    >>> gs = crypto_scalarmult_ristretto255_base_allow_scalar_zero(s)
+    >>> crypto_core_ristretto255_is_valid_point(gs)
+    True
+    >>> crypto_scalarmult_ristretto255_base_allow_scalar_zero(
+    ...   crypto_core_ristretto255_scalar_sub(s, s)
+    ... ) == crypto_core_ristretto255_sub(gs, gs)
+    True
+
+    :param n: a :py:data:`.crypto_scalarmult_ristretto255_SCALARBYTES` long bytes
+              sequence representing a scalar
+    :type n: bytes
+    :return: a point on the ristretto255 curve, represented as a
+             :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
+    :rtype: bytes
+    """
+    if not isinstance(n, bytes) or len(
+            n) != crypto_scalarmult_ristretto255_SCALARBYTES:
+        raise TypeError(
+            f"Input must be a {crypto_scalarmult_ristretto255_SCALARBYTES} long bytes sequence"
+        )  # pragma: no cover
+
+    q = _sodium.ffi.new(
+        "unsigned char[]",
+        crypto_scalarmult_ristretto255_BYTES)
+
+    _sodium.lib.crypto_scalarmult_ristretto255_base(q, n)  # If -1, then q remains cleared (b'\0'*32).
+
+    return _sodium.ffi.buffer(q, crypto_scalarmult_ristretto255_BYTES)[:]
+
+
 def crypto_scalarmult_ristretto255(n, p):
     """
     Computes and returns the scalar product of a *clamped* integer ``n``
@@ -579,6 +615,71 @@ def crypto_scalarmult_ristretto255(n, p):
     if _sodium.lib.crypto_scalarmult_ristretto255(q, n, p) == -1:
         raise RuntimeError(
             "`n` cannot be larger than the size of the group or p^n is the identity element")
+
+    return _sodium.ffi.buffer(q, crypto_scalarmult_ristretto255_BYTES)[:]
+
+
+def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
+    """
+    Computes and returns the scalar product of a *clamped* integer ``n``
+    and the given group element on the ristretto255 curve.
+    The scalar is clamped, as done in the public key generation case,
+    by setting to zero the bits in position [0, 1, 2, 255] and setting
+    to one the bit in position 254.  Zero-valued scalars are allowed.
+
+    Example - Scalar multiplication is an invertible operation:
+
+    >>> s = crypto_core_ristretto255_scalar_random()
+    >>> p = crypto_core_ristretto255_random()
+    >>> masked = crypto_scalarmult_ristretto255_allow_scalar_zero(s, p)
+    >>> s_inv = crypto_core_ristretto255_scalar_invert(s)
+    >>> unmasked = crypto_scalarmult_ristretto255_allow_scalar_zero(s_inv, masked)
+    >>> unmasked == p
+    True
+
+    Example - Multiplication by zero is allowed:
+
+    >>> zero_scalar, zero_point = bytes(32), bytes(32)
+    >>> crypto_scalarmult_ristretto255_allow_scalar_zero(zero_scalar, p) == zero_point
+    True
+
+    Example - The scalar being zero does not raise an error, but the point being invalid does:
+
+    >>> invalid_point = b'\1'*32
+    >>> crypto_scalarmult_ristretto255_allow_scalar_zero(zero_scalar, invalid_point)
+    Traceback (most recent call last):
+      ...
+    TypeError: Input must be a 32 long bytes sequence representing a valid Ristretto255 point
+
+    :param n: a :py:data:`.crypto_scalarmult_ristretto255_SCALARBYTES` long bytes
+              sequence representing a scalar
+    :type n: bytes
+    :param p: a :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
+              representing a point on the ristretto255 curve
+    :type p: bytes
+    :return: a point on the ristretto255 curve, represented as a
+             :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
+    :rtype: bytes
+    """
+    if not isinstance(n, bytes) or len(
+            n) != crypto_scalarmult_ristretto255_SCALARBYTES:
+        raise TypeError(
+            f"Input must be a {crypto_scalarmult_ristretto255_SCALARBYTES} long bytes sequence"
+        )  # pragma: no cover
+
+    if not isinstance(p, bytes) or \
+            len(p) != crypto_scalarmult_ristretto255_BYTES or \
+            not crypto_core_ristretto255_is_valid_point(p):
+        raise TypeError(
+            f"Input must be a {crypto_scalarmult_ristretto255_BYTES} long bytes sequence"
+            f" representing a valid Ristretto255 point"
+        )  # pragma: no cover
+
+    q = _sodium.ffi.new(
+        "unsigned char[]",
+        crypto_scalarmult_ristretto255_BYTES)
+
+    _sodium.lib.crypto_scalarmult_ristretto255(q, n, p)  # If -1, then q remains cleared (b'\0'*32).
 
     return _sodium.ffi.buffer(q, crypto_scalarmult_ristretto255_BYTES)[:]
 
