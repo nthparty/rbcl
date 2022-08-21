@@ -2,8 +2,7 @@
 rbcl
 ====
 
-Ristretto group Python binding to
-`libsodium <https://github.com/jedisct1/libsodium>`__
+Ristretto group Python binding to `libsodium <https://github.com/jedisct1/libsodium>`__
 
 |pypi| |readthedocs| |actions| |coveralls|
 
@@ -63,7 +62,7 @@ The following bindings are made available:
 
     crypto_core_ristretto255_scalar_add(s1, s2)
     crypto_core_ristretto255_scalar_sub(s1, s2)
-    crypto_core_ristretto255_scalar_mul(s1, s2)  # NOT scalar mulitplication of a point!
+    crypto_core_ristretto255_scalar_mul(s1, s2)  # NOT scalar multiplication of a point!
     crypto_core_ristretto255_scalar_complement(s)
     crypto_core_ristretto255_scalar_invert(s)
     crypto_core_ristretto255_scalar_negate(s)
@@ -77,8 +76,10 @@ The following bindings are made available:
 
     crypto_core_ristretto255_add(p, q)
     crypto_core_ristretto255_sub(p, q)
-    crypto_scalarmult_ristretto255(p, s)
+    crypto_scalarmult_ristretto255(s, p)
+    crypto_scalarmult_ristretto255_allow_scalar_zero(s, p)
     crypto_scalarmult_ristretto255_base(s)
+	crypto_scalarmult_ristretto255_base_allow_scalar_zero(s)
 
 Constants
 ~~~~~~~~~
