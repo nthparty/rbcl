@@ -6,6 +6,11 @@ all `crypto_scalarmult*` methods and the `randombytes*` methods.
 """
 from __future__ import annotations
 import doctest
+from barriers import barriers
+
+import pathlib
+enabled = 'site-packages' not in str(pathlib.Path(__file__).resolve())
+safe = barriers(enabled) @ globals()
 
 try:
     from rbcl import _sodium
@@ -619,6 +624,7 @@ def crypto_scalarmult_ristretto255(n, p):
     return _sodium.ffi.buffer(q, crypto_scalarmult_ristretto255_BYTES)[:]
 
 
+@safe
 def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
     """
     Computes and returns the scalar product of a *clamped* integer ``n``
@@ -643,6 +649,14 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
     >>> crypto_scalarmult_ristretto255_allow_scalar_zero(zero_scalar, p) == zero_point
     True
 
+    Example - The scalar being zero does not raise an error, but the point being invalid does:
+
+    >>> invalid_point = b'\1'*32
+    >>> crypto_scalarmult_ristretto255_allow_scalar_zero(zero_scalar, invalid_point)
+    Traceback (most recent call last):
+      ...
+    TypeError: The second input must represent a valid Ristretto255 point
+
     :param n: a :py:data:`.crypto_scalarmult_ristretto255_SCALARBYTES` long bytes
               sequence representing a scalar
     :type n: bytes
@@ -662,6 +676,10 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
         raise TypeError(
             f"Input must be a {crypto_scalarmult_ristretto255_BYTES} long bytes sequence"
         )  # pragma: no cover
+
+    safe
+    if not crypto_core_ristretto255_is_valid_point(p):
+        raise TypeError(f"The second input must represent a valid Ristretto255 point")
 
     q = _sodium.ffi.new(
         "unsigned char[]",

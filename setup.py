@@ -43,7 +43,7 @@ def prepare_libsodium_source_tree(libsodium_folder='rbcl/libsodium'):
             raise RuntimeError(
                 'failed to download libsodium archive and no local ' + \
                 'archive was found at `' + libsodium_tar_gz_path + '`'
-            ) from None
+            )
 
     # Extract the archive into a temporary folder (removing
     # the folder if it already exists).
@@ -183,7 +183,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/x-rst",
     test_suite="nose.collector",
-    tests_require=["nose"],
+    tests_require=["nose", "barriers"],
     packages=["rbcl"],
     ext_package="rbcl",
     cffi_modules=["rbcl/sodium_ffi.py:sodium_ffi"],
