@@ -20,7 +20,7 @@ try:
 except ImportError:
     from distutils.command.build_clib import build_clib as _build_clib
 
-def prepare_libsodium_source_tree(libsodium_folder='rbcl/libsodium'):
+def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     """
     Retrieve the libsodium source archive and extract it
     to the location used by the build process.
@@ -31,8 +31,8 @@ def prepare_libsodium_source_tree(libsodium_folder='rbcl/libsodium'):
         'https://github.com/jedisct1/libsodium/releases' + \
         '/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz'
     )
-    libsodium_tar_gz_path = './rbcl/libsodium.tar.gz'
-    libsodium_tar_gz_folder = './rbcl/libsodium_tar_gz'
+    libsodium_tar_gz_path = './src/rbcl/libsodium.tar.gz'
+    libsodium_tar_gz_folder = './src/rbcl/libsodium_tar_gz'
 
     # Download the source archive to a local path (unless
     # it is already present).
@@ -77,7 +77,7 @@ class build_clib(_build_clib):
         return [
             file
             for i in range(1, 8)
-            for file in glob.glob(os.path.relpath('rbcl/libsodium' + ('/*' * i)))
+            for file in glob.glob(os.path.relpath('src/rbcl/libsodium' + ('/*' * i)))
         ]
 
     def build_libraries(self, libraries):
@@ -142,7 +142,7 @@ class build_clib(_build_clib):
         # Configure libsodium, build it as a shared library file, check it,
         # and install it.
         subprocess.check_call(
-            [os.path.abspath(os.path.relpath('rbcl/libsodium/configure'))] + \
+            [os.path.abspath(os.path.relpath('src/rbcl/libsodium/configure'))] + \
             [
                 '--disable-shared', '--enable-static',
                 '--disable-debug', '--disable-dependency-tracking', '--with-pic',
@@ -186,10 +186,35 @@ setup(
     tests_require=["nose", "barriers"],
     packages=["rbcl"],
     ext_package="rbcl",
-    cffi_modules=["rbcl/sodium_ffi.py:sodium_ffi"],
+    cffi_modules=["src/rbcl/sodium_ffi.py:sodium_ffi"],
     cmdclass={
         "build_clib": build_clib,
         "build_ext": build_ext,
+    },
+    install_requires=["cffi~=1.15", "barriers"],
+    extras_require={
+        "build": [
+            'setuptools~=62.0',
+            'wheel~=0.37',
+            'cffi~=1.15'
+        ],
+        'docs': [
+            'sphinx~=4.2.0',
+            'sphinx-rtd-theme~=1.0.0'
+        ],
+        'test': [
+            'pytest~=7.0',
+            'pytest-cov~=3.0'
+        ],
+        'lint': [
+            'pylint~=2.14.0'
+        ],
+        'coveralls': [
+            'coveralls~=3.3.1'
+        ],
+        'publish': [
+            'twine~=4.0'
+        ]
     },
     distclass=Distribution,
     zip_safe=False

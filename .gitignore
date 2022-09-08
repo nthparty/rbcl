@@ -9,7 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
-rbcl/libsodium/
+src/rbcl/libsodium/
 develop-eggs/
 dist/
 downloads/
@@ -134,3 +134,6 @@ cover/
 
 # macOS
 .DS_Store
+
+# Intellij
+.idea

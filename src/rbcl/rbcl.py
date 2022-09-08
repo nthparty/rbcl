@@ -6,14 +6,14 @@ all `crypto_scalarmult*` methods and the `randombytes*` methods.
 """
 from __future__ import annotations
 import doctest
+import pathlib
 from barriers import barriers
 
-import pathlib
-enabled = 'site-packages' not in str(pathlib.Path(__file__).resolve())
+enabled = 'site-packages' not in str(pathlib.Path(__file__).resolve()) # pylint: disable=C0103
 safe = barriers(enabled) @ globals()
 
 try:
-    from rbcl import _sodium
+    from rbcl import _sodium # pylint: disable=cyclic-import
 except: # pylint: disable=W0702 # pragma: no cover
     # Support for direct invocation in order to execute doctests.
     import _sodium
@@ -677,9 +677,9 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
             f"Input must be a {crypto_scalarmult_ristretto255_BYTES} long bytes sequence"
         )  # pragma: no cover
 
-    safe
+    safe # pylint: disable=W0104
     if not crypto_core_ristretto255_is_valid_point(p):
-        raise TypeError(f"The second input must represent a valid Ristretto255 point")
+        raise TypeError("The second input must represent a valid Ristretto255 point")
 
     q = _sodium.ffi.new(
         "unsigned char[]",
