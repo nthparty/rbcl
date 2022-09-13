@@ -25,14 +25,19 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     Retrieve the libsodium source archive and extract it
     to the location used by the build process.
     """
+
+    # Return if libsodium source tree has already been prepared.
+    if os.path.exists(libsodium_folder) and len(os.listdir(libsodium_folder)) != 0:
+        return libsodium_folder
+
     # URL from which libsodium source archive is retrieved,
     # and paths into which it is extracted and then moved.
     url = (
         'https://github.com/jedisct1/libsodium/releases' + \
         '/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz'
     )
-    libsodium_tar_gz_path = './src/rbcl/libsodium.tar.gz'
-    libsodium_tar_gz_folder = './src/rbcl/libsodium_tar_gz'
+    libsodium_tar_gz_path = 'src/rbcl/libsodium.tar.gz'
+    libsodium_tar_gz_folder = 'src/rbcl/libsodium_tar_gz'
 
     # Download the source archive to a local path (unless
     # it is already present).
