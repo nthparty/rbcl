@@ -57,8 +57,8 @@ jobs:
           cd docs && ../.venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && cd ..
       - name: Upload wheel file.
         run: |
-           mkdir rbcl-wheelhouse
-           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
+          mkdir rbcl-wheelhouse
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
       - uses: actions/upload-artifact@v1
         with:
           name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
@@ -86,6 +86,10 @@ jobs:
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS ${{ matrix.python.version-macos }}"
     steps:
       - uses: actions/checkout@v2
+      - name: Download libsodium source tree archive.
+        run: |
+          wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
+          mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
       - name: Install Python.
         run: |
           curl "${{ matrix.python.url }}" -o python.pkg
@@ -94,11 +98,9 @@ jobs:
           ${{ matrix.python.bin-path }} -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
-          wget -O src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
-          wget -O src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           mkdir wheelhouse
           REGEX="3\.([0-9])*"
           PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
@@ -110,14 +112,12 @@ jobs:
         run: venv/bin/pip install -f wheelhouse --no-index rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
-          wget -O ./src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           venv/bin/pip install -U pip .[lint,test]
           venv/bin/python -m pylint rbcl # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
         run: |
-          wget -O ./src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           venv/bin/pip install -U .[docs]
           cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && cd ..
       - name: Upload wheel file.
@@ -146,6 +146,10 @@ jobs:
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS ${{ matrix.python.version-macos }} ARM"
     steps:
       - uses: actions/checkout@v2
+      - name: Download libsodium source tree archive.
+        run: |
+          wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
+          mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
       - name: Install Python.
         run: |
           curl "${{ matrix.python.url }}" -o python.pkg
@@ -154,11 +158,9 @@ jobs:
           ${{ matrix.python.bin-path }} -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
-          wget -O ./src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
-          wget -O ./src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           mkdir wheelhouse
           PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
           rm -f dist/*.*
@@ -169,7 +171,6 @@ jobs:
         run: venv/bin/pip install -f wheelhouse --no-index rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
-          wget -O ./src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           venv/bin/pip install -U pip .[lint,test]
           venv/bin/python -m pylint rbcl # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
@@ -177,7 +178,6 @@ jobs:
           #venv/bin/python -m nose --cover-erase # Test using nose.  # RbCl 0.2.0 has succeeded before but but errored at end [due to nose in 3.10 bug](https://github.com/nose-devs/nose/issues/1099)
       - name: Test auto-generation of documentation.
         run: |
-          wget -O ./src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
           venv/bin/pip install -U .[docs]
           cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && cd ..
       - name: Upload wheel file.
