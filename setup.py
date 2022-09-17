@@ -175,7 +175,7 @@ with open("README.rst", "r") as fh:
     long_description = fh.read().replace(".. include:: toc.rst\n\n", "")
 
 name = "rbcl"
-version = "0.3.1"
+version = "0.4.0"
 
 setup(
     name=name,

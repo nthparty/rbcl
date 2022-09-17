@@ -2,7 +2,7 @@ name: lint-test-build-upload
 on:
   push
 env:
-  version: "0.3.1"
+  version: "0.4.0"
 jobs:
   manylinux:
     runs-on: ubuntu-latest
@@ -68,22 +68,10 @@ jobs:
     strategy:
       matrix:
         python:
-          - version: '3.7'
-            version-abi: 'cp37'
-            version-macos: '10.9'
-            url: 'https://www.python.org/ftp/python/3.7.9/python-3.7.9-macosx10.9.pkg'
-            bin-path: '/Library/Frameworks/Python.framework/Versions/3.7/bin/python3'
-          - version: '3.8'
-            version-abi: 'cp38'
-            version-macos: '10.9'
-            url: 'https://www.python.org/ftp/python/3.8.9/python-3.8.9-macosx10.9.pkg'
-            bin-path: '/Library/Frameworks/Python.framework/Versions/3.8/bin/python3'
-          - version: '3.9'
-            version-abi: 'cp39'
-            version-macos: '10.9'
-            url: 'https://www.python.org/ftp/python/3.9.9/python-3.9.9-macosx10.9.pkg'
-            bin-path: '/Library/Frameworks/Python.framework/Versions/3.9/bin/python3'
-    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS ${{ matrix.python.version-macos }}"
+          - {version: '3.7', version-abi: 'cp37', version-url: '3.7.9'}
+          - {version: '3.8', version-abi: 'cp38', version-url: '3.8.9'}
+          - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
+    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -92,10 +80,10 @@ jobs:
           mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
       - name: Install Python.
         run: |
-          curl "${{ matrix.python.url }}" -o python.pkg
+          curl "https://www.python.org/ftp/python/${{ matrix.python.version-url }}/python-${{ matrix.python.version-url }}-macosx10.9.pkg" -o python.pkg
           sudo installer -pkg python.pkg -target /
-          ${{ matrix.python.bin-path }} -m pip install -U virtualenv
-          ${{ matrix.python.bin-path }} -m virtualenv venv
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m pip install -U virtualenv
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
           venv/bin/pip install -U pip .[build]
@@ -133,17 +121,9 @@ jobs:
     strategy:
       matrix:
         python:
-          - version: '3.9'
-            version-abi: 'cp39'
-            version-macos: '11'
-            url: 'https://www.python.org/ftp/python/3.9.9/python-3.9.9-macos11.pkg'
-            bin-path: '/Library/Frameworks/Python.framework/Versions/3.9/bin/python3'
-          - version: '3.10'
-            version-abi: 'cp310'
-            version-macos: '11'
-            url: 'https://www.python.org/ftp/python/3.10.6/python-3.10.6-macos11.pkg'
-            bin-path: '/Library/Frameworks/Python.framework/Versions/3.10/bin/python3'
-    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS ${{ matrix.python.version-macos }} ARM"
+          - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
+          - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
+    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -152,10 +132,10 @@ jobs:
           mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
       - name: Install Python.
         run: |
-          curl "${{ matrix.python.url }}" -o python.pkg
+          curl "https://www.python.org/ftp/python/${{ matrix.python.version-url }}/python-${{ matrix.python.version-url }}-macos11.pkg" -o python.pkg
           sudo installer -pkg python.pkg -target /
-          ${{ matrix.python.bin-path }} -m pip install -U virtualenv
-          ${{ matrix.python.bin-path }} -m virtualenv venv
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m pip install -U virtualenv
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
           venv/bin/pip install -U pip .[build]
@@ -175,7 +155,6 @@ jobs:
           venv/bin/python -m pylint rbcl # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
-          #venv/bin/python -m nose --cover-erase # Test using nose.  # RbCl 0.2.0 has succeeded before but but errored at end [due to nose in 3.10 bug](https://github.com/nose-devs/nose/issues/1099)
       - name: Test auto-generation of documentation.
         run: |
           venv/bin/pip install -U .[docs]
@@ -203,14 +182,6 @@ jobs:
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
     steps:
       - uses: actions/checkout@v2
-      - name: Install Python.
-        uses: actions/setup-python@v2.2.2
-        with:
-          python-version: ${{ matrix.python.version }}
-          architecture: ${{ matrix.windows.arch }}
-      - name: Install Python dependencies for build process.
-        run: python -m pip install -U pip .[build]
-        shell: bash
       - name: Download and extract libsodium dynamic library file.
         run: |
           wget -O c:\libsodium-1.0.18-msvc.zip https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18-msvc.zip
@@ -220,6 +191,14 @@ jobs:
         run: |
           echo "INCLUDE=C:/libsodium/include;$INCLUDE" >> $GITHUB_ENV
           echo "LIB=C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/static;$LIB" >> $GITHUB_ENV
+        shell: bash
+      - name: Install Python.
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ matrix.python.version }}
+          architecture: ${{ matrix.windows.arch }}
+      - name: Install Python dependencies for build process.
+        run: python -m pip install -U pip .[build]
         shell: bash
       - name: Build wheel file.
         run: |
