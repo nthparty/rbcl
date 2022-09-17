@@ -1,4 +1,4 @@
-name: lint-test-build-upload
+name: lint-test-cover-docs-build-upload
 on:
   push
 env:
@@ -216,6 +216,12 @@ jobs:
           python -m pylint rbcl # Check against linting rules.
           python src/rbcl/rbcl.py -v # Run doctests.
           python -m pytest # Run tests.
+      - name: Test auto-generation of documentation.
+        run: |
+          python -m pip install -U .[docs]
+          cd docs
+          sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/bcl/sodium_ffi.py
+          cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse

@@ -14,7 +14,7 @@ Ristretto group Python binding to `libsodium <https://github.com/jedisct1/libsod
    :target: https://rbcl.readthedocs.io/en/latest/?badge=latest
    :alt: Read the Docs documentation status.
 
-.. |actions| image:: https://github.com/nthparty/rbcl/workflows/lint-test-build-upload/badge.svg
+.. |actions| image:: https://github.com/nthparty/rbcl/workflows/lint-test-cover-docs-build-upload/badge.svg
    :target: https://github.com/nthparty/rbcl/actions
    :alt: GitHub Actions status.
 
