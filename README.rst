@@ -128,10 +128,9 @@ Publishing (for Maintainers Only)
 ===================================
 Documentation
 ===================================
-.. include:: toc.rst
 
 The documentation can be generated automatically from the source files using `Sphinx <https://www.sphinx-doc.org/>`_::
 
+    python -m pip install .[docs]
     cd docs
-    python -m pip install -r requirements.txt
-    sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../rbcl/sodium_ffi.py && make html
+    sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && make html
