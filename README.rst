@@ -2,7 +2,7 @@
 rbcl
 ====
 
-Ristretto group Python binding to `libsodium <https://github.com/jedisct1/libsodium>`__
+Python library that bundles `libsodium <https://github.com/jedisct1/libsodium>`__ and provides wrappers for its Ristretto group functions.
 
 |pypi| |readthedocs| |actions| |coveralls|
 
@@ -22,115 +22,123 @@ Ristretto group Python binding to `libsodium <https://github.com/jedisct1/libsod
    :target: https://coveralls.io/github/nthparty/rbcl?branch=main
    :alt: Coveralls test coverage summary.
 
-rbcl supports Python 3.7, 3.8 and 3.9.
+Installation and Usage
+----------------------
+This library is available as a `package on PyPI <https://pypi.org/project/rbcl>`__::
 
-.. code:: python
+    python -m pip install rbcl
 
+The library can be imported in the usual ways::
+
+    import rbcl
     from rbcl import *
 
-    x = crypto_core_ristretto255_random()
-    assert crypto_core_ristretto255_is_valid_point(x)
+Examples
+^^^^^^^^
 
-    y = crypto_core_ristretto255_from_hash(b'\xF0'*64)
-    assert crypto_core_ristretto255_is_valid_point(y)
+A few usage examples are presented below::
 
-    z1 = crypto_core_ristretto255_add(x, y)
-    z2 = crypto_core_ristretto255_add(y, x)
-    assert z1 == z2  # Assert that point addition commutes (in L)
+    >>> from rbcl import *
+    >>> x = crypto_core_ristretto255_random()
+    >>> assert crypto_core_ristretto255_is_valid_point(x)
+    >>> y = crypto_core_ristretto255_from_hash(b'\xF0'*64)
+    >>> assert crypto_core_ristretto255_is_valid_point(y)
+    >>> z1 = crypto_core_ristretto255_add(x, y)
+    >>> z2 = crypto_core_ristretto255_add(y, x)
+    >>> assert z1 == z2  # Assert that point addition commutes.
+    >>> s1 = crypto_core_ristretto255_scalar_random()
+    >>> s2 = crypto_core_ristretto255_scalar_random()
+    >>> w1 = crypto_scalarmult_ristretto255(s1, crypto_scalarmult_ristretto255(s2, x))
+    >>> w2 = crypto_scalarmult_ristretto255(s2, crypto_scalarmult_ristretto255(s1, x))
+    >>> assert w1 == w2  # Assert that point multiplication (by a scalar) is repeated addition.
 
-    s1 = crypto_core_ristretto255_scalar_random()
-    s2 = crypto_core_ristretto255_scalar_random()
-    w1 = crypto_scalarmult_ristretto255(s1, crypto_scalarmult_ristretto255(s2, x))
-    w2 = crypto_scalarmult_ristretto255(s2, crypto_scalarmult_ristretto255(s1, x))
-    assert w1 == w2  # Assert that point multiplication (by a scalar) is repeated addition (in L)
+This library exports Python wrappers for `constructors <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#encoded-element-validation>`__, `point arithmetic functions <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-multiplication>`__, and `scalar arithmetic functions <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-arithmetic-over-l>`__.
 
-The following bindings are made available:
+Development, Build, and Manual Installation Instructions
+--------------------------------------------------------
+All development and installation dependencies are managed using `setuptools <https://pypi.org/project/setuptools>`__ and are fully specified in ``setup.py``. The ``extras_require`` parameter is used to `specify optional requirements <https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies>`__ for various development tasks. This makes it possible to specify additional options (such as ``docs``, ``lint``, and so on) when performing installation using `pip <https://pypi.org/project/pip>`__::
 
-`Constructors <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#encoded-element-validation>`__
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    python -m pip install .[docs,lint]
 
-.. code:: python
+Building from Source
+^^^^^^^^^^^^^^^^^^^^
+The library can be built manually from source **within Linux and macOS** using the sequence of commands below::
 
-    crypto_core_ristretto255_random()
-    crypto_core_ristretto255_from_hash(h)
-    crypto_core_ristretto255_is_valid_point(p)
-
-`Scalar arithmetic <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-arithmetic-over-l>`__
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code:: python
-
-    crypto_core_ristretto255_scalar_add(s1, s2)
-    crypto_core_ristretto255_scalar_sub(s1, s2)
-    crypto_core_ristretto255_scalar_mul(s1, s2)  # NOT scalar multiplication of a point!
-    crypto_core_ristretto255_scalar_complement(s)
-    crypto_core_ristretto255_scalar_invert(s)
-    crypto_core_ristretto255_scalar_negate(s)
-    crypto_core_ristretto255_scalar_reduce(s)
-    crypto_core_ristretto255_scalar_random()
-
-`Point arithmetic <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-multiplication>`__
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code:: python
-
-    crypto_core_ristretto255_add(p, q)
-    crypto_core_ristretto255_sub(p, q)
-    crypto_scalarmult_ristretto255(s, p)
-    crypto_scalarmult_ristretto255_allow_scalar_zero(s, p)
-    crypto_scalarmult_ristretto255_base(s)
-	crypto_scalarmult_ristretto255_base_allow_scalar_zero(s)
-
-Constants
-~~~~~~~~~
-
-::
-
-    crypto_scalarmult_ristretto255_bytes
-    crypto_scalarmult_ristretto255_scalarbytes
-    crypto_core_ristretto255_bytes
-    crypto_core_ristretto255_scalarbytes
-    crypto_core_ristretto255_hashbytes
-    crypto_core_ristretto255_nonreducedscalarbytes
-
-Helpers
-~~~~~~~
-
-::
-
-    randombytes
-    randombytes_buf_deterministic
-
-===================================
-Manual installation
-===================================
-
-.. code:: shell
-
-    # Build as a wheel and install
+    python -m pip install .[build]
     python setup.py bdist_wheel
-    python -m pip install -f wheelhouse --no-index rbcl
-    python -m nose
 
-===================================
-Publishing (for Maintainers Only)
-===================================
+Developing the library further in a local environment and/or building the library from source requires `libsodium <https://doc.libsodium.org>`__. The step ``python setup.py bdist_wheel`` in the above attempts to automatically locate a copy of the libsodium source archive ``src/rbcl/libsodium.tar.gz``. If the archive corresponding to the operating system is not found, the build process attempts to download it. To support building offline, it is necessary to first download the appropriate libsodium archive to its designated location::
 
-.. code:: shell
-    
-    # Package source distribution
-    python setup.py sdist
-    
-    # Run wheel-builder.yml and save/download artifacts locally, e.g. in ./dist
-    # Then, upload to PyPi
-    twine upload dist/rbcl-0.2.0*
+    wget -O src/rbcl/libsodium.tar.gz https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
 
-===================================
+The process for building manually from source within a Windows environment is not currently documented, but an example of one sequence of steps can be found in the Windows job entry within the GitHub Actions workflow defined in the file ``.github/workflows/lint-test-cover-docs-build-upload.yml``.
+
+Preparation for Local Development
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Before `documentation can be generated <#documentation>`_ or `tests can be executed <#testing-and-conventions>`_, it is necessary to `run the build process <#building-from-source>`_ and then to use the command below to move the compiled libsodium shared/dynamic library file into its designated location (so that the module file ``src/rbcl/rbcl.py`` is able to import it)::
+
+    cp build/lib*/rbcl/_sodium*.* src/rbcl
+
+Manual Installation
+^^^^^^^^^^^^^^^^^^^
+Once the package is `built <#building-from-source>`_, it can be installed manually using the command below::
+
+    python -m pip install -f dist . --upgrade
+
 Documentation
-===================================
-
-The documentation can be generated automatically from the source files using `Sphinx <https://www.sphinx-doc.org/>`_::
+^^^^^^^^^^^^^
+Once the libsodium shared library file is compiled and moved into its designated location (as described in `the relevant subsection above <#preparation-for-local-development>`_), the documentation can be generated automatically from the source files using `Sphinx <https://www.sphinx-doc.org>`__::
 
     python -m pip install .[docs]
     cd docs
     sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && make html
+
+Testing and Conventions
+^^^^^^^^^^^^^^^^^^^^^^^
+Before unit tests can be executed, it is first necessary to prepare for local development by compiling and moving into its designated location the libsodium shared library file (as described in `the relevant subsection above <#preparation-for-local-development>`__).
+
+All unit tests are executed and their coverage is measured when using `pytest <https://docs.pytest.org>`__ (see ``pyproject.toml`` for configuration details)::
+
+    python -m pip install .[test]
+    python -m pytest
+
+Alternatively, all unit tests are included in the module itself and can be executed using `doctest <https://docs.python.org/3/library/doctest.html>`__::
+
+    python src/rbcl/rbcl.py -v
+
+Style conventions are enforced using `Pylint <https://pylint.pycqa.org>`__::
+
+    python -m pip install .[lint]
+    python -m pylint rbcl
+
+Contributions
+^^^^^^^^^^^^^
+In order to contribute to the source code, open an issue or submit a pull request on the `GitHub page <https://github.com/nthparty/rbcl>`__ for this library.
+
+Versioning
+^^^^^^^^^^
+The version number format for this library and the changes to the library associated with version number increments conform with `Semantic Versioning 2.0.0 <https://semver.org/#semantic-versioning-200>`__.
+
+Publishing
+^^^^^^^^^^
+This library can be published as a `package on PyPI <https://pypi.org/project/rbcl>`__ by a package maintainer. First, install the dependencies required for packaging and publishing::
+
+    python -m pip install .[publish]
+
+Ensure that the correct version number appears in ``setup.py``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions. Create and push a tag for this version (replacing ``?.?.?`` with the version number)::
+
+    git tag ?.?.?
+    git push origin ?.?.?
+
+Remove any old build/distribution files. Then, package the source into a distribution archive::
+
+    rm -rf build dist src/*.egg-info
+    python setup.py sdist
+
+Next, navigate to the appropriate GitHub Actions run of the workflow defined in ``lint-test-cover-docs-build-upload.yml``. Click on the workflow and scroll down to the **Artifacts** panel. Download the archive files to the ``dist`` directory. Unzip all the archive files so that only the ``*.whl`` files remain::
+
+    cd dist && for i in `ls *.zip`; do unzip $i; done && rm *.zip && cd ..
+
+Finally, upload the package distribution archive to `PyPI <https://pypi.org>`__::
+
+    python -m twine upload dist/*
