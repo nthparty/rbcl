@@ -1,5 +1,5 @@
 """
-Setup, package, and build file for the rbcl cryptography library.
+Setup, package, and build file.
 """
 import sys
 import platform
@@ -33,11 +33,11 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     # URL from which libsodium source archive is retrieved,
     # and paths into which it is extracted and then moved.
     url = (
-        'https://github.com/jedisct1/libsodium/releases' + \
+        'https://github.com/jedisct1/libsodium/releases' +
         '/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz'
     )
-    libsodium_tar_gz_path = 'src/rbcl/libsodium.tar.gz'
-    libsodium_tar_gz_folder = 'src/rbcl/libsodium_tar_gz'
+    libsodium_tar_gz_path = './src/rbcl/libsodium.tar.gz'
+    libsodium_tar_gz_folder = './src/rbcl/libsodium_tar_gz'
 
     # Download the source archive to a local path (unless
     # it is already present).
@@ -46,9 +46,9 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
             urllib.request.urlretrieve(url, filename=libsodium_tar_gz_path)
         except:
             raise RuntimeError(
-                'failed to download libsodium archive and no local ' + \
+                'failed to download libsodium archive and no local ' +
                 'archive was found at `' + libsodium_tar_gz_path + '`'
-            )
+            ) from None
 
     # Extract the archive into a temporary folder (removing
     # the folder if it already exists).
@@ -147,12 +147,12 @@ class build_clib(_build_clib):
         # Configure libsodium, build it as a shared library file, check it,
         # and install it.
         subprocess.check_call(
-            [os.path.abspath(os.path.relpath('src/rbcl/libsodium/configure'))] + \
+            [os.path.abspath(os.path.relpath('src/rbcl/libsodium/configure'))] +
             [
                 '--disable-shared', '--enable-static',
                 '--disable-debug', '--disable-dependency-tracking', '--with-pic',
-            ] + \
-            (['--disable-ssp'] if platform.system() == 'SunOS' else []) + \
+            ] +
+            (['--disable-ssp'] if platform.system() == 'SunOS' else []) +
             ['--prefix', os.path.abspath(self.build_clib)],
             cwd=build_temp
         )
@@ -171,34 +171,23 @@ class build_ext(_build_ext):
 
         return _build_ext.run(self)
 
-with open("README.rst", "r") as fh:
-    long_description = fh.read().replace(".. include:: toc.rst\n\n", "")
+with open('README.rst', 'r') as fh:
+    long_description = fh.read()
 
-name = "rbcl"
-version = "0.4.0"
+name = 'rbcl'
+version = '0.4.0'
 
 setup(
     name=name,
     version=version,
-    license="MIT",
-    url="https://github.com/nthparty/rbcl",
-    author="Nth Party, Ltd.",
-    author_email="team@nthparty.com",
-    description="Python library that provides wrappers around the Ristretto group operations in libsodium.",
-    long_description=long_description,
-    long_description_content_type="text/x-rst",
-    test_suite="nose.collector",
-    tests_require=["nose", "barriers"],
-    packages=["rbcl"],
-    ext_package="rbcl",
-    cffi_modules=["src/rbcl/sodium_ffi.py:sodium_ffi"],
-    cmdclass={
-        "build_clib": build_clib,
-        "build_ext": build_ext,
-    },
-    install_requires=["cffi~=1.15", "barriers"],
+    packages=[name],
+    ext_package=name,
+    install_requires=[
+        'cffi~=1.15',
+        'barriers~=1.0'
+    ],
     extras_require={
-        "build": [
+        'build': [
             'setuptools~=62.0',
             'wheel~=0.37',
             'cffi~=1.15'
@@ -220,6 +209,19 @@ setup(
         'publish': [
             'twine~=4.0'
         ]
+    },
+    license='MIT',
+    url='https://github.com/nthparty/rbcl',
+    author='Nth Party, Ltd.',
+    author_email='team@nthparty.com',
+    description='Python library that bundles libsodium and provides ' + \
+                'wrappers for its Ristretto group functions.',
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
+    cffi_modules=['src/rbcl/sodium_ffi.py:sodium_ffi'],
+    cmdclass={
+        'build_clib': build_clib,
+        'build_ext': build_ext,
     },
     distclass=Distribution,
     zip_safe=False
