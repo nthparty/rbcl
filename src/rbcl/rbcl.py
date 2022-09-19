@@ -588,7 +588,9 @@ def crypto_scalarmult_ristretto255(n, p):
     return _sodium.ffi.buffer(q, crypto_scalarmult_ristretto255_BYTES)[:]
 
 @safe
-def crypto_scalarmult_ristretto255_allow_scalar_zero(n, p):
+def crypto_scalarmult_ristretto255_allow_scalar_zero(
+        n, p
+    ): # pragma: no cover # The decorator recompiles this function body.
     """
     Computes and returns the scalar product of a *clamped* integer ``n``
     and the given group element on the ristretto255 curve.
