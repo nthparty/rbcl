@@ -11,12 +11,12 @@ import doctest
 import pathlib
 from barriers import barriers
 
-enabled = 'site-packages' not in str(pathlib.Path(__file__).resolve()) # pylint: disable=C0103
-safe = barriers(enabled) @ globals()
+VALIDATION_ENABLED = 'site-packages' not in str(pathlib.Path(__file__).resolve())
+safe = barriers(VALIDATION_ENABLED) @ globals()
 
 try:
     from rbcl import _sodium # pylint: disable=cyclic-import
-except: # pylint: disable=W0702 # pragma: no cover
+except: # pylint: disable=bare-except # pragma: no cover
     # Support for direct invocation in order to execute doctests.
     import _sodium
 
@@ -642,7 +642,7 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(
             f'Input must be a {crypto_scalarmult_ristretto255_BYTES} long bytes sequence'
         ) # pragma: no cover
 
-    safe # pylint: disable=W0104
+    safe # pylint: disable=pointless-statement # Marker for ``barriers`` decorator ``safe``.
     if not crypto_core_ristretto255_is_valid_point(p):
         raise TypeError('The second input must represent a valid Ristretto255 point')
 

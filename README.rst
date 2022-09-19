@@ -109,7 +109,7 @@ Alternatively, all unit tests are included in the module itself and can be execu
 Style conventions are enforced using `Pylint <https://pylint.pycqa.org>`__::
 
     python -m pip install .[lint]
-    python -m pylint rbcl
+    python -m pylint src/rbcl
 
 Contributions
 ^^^^^^^^^^^^^
