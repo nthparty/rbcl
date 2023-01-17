@@ -55,20 +55,18 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     with tarfile.open(libsodium_tar_gz_path) as libsodium_tar_gz:
         if os.path.exists(libsodium_tar_gz_folder):
             shutil.rmtree(libsodium_tar_gz_folder)
-        def validate_tarball_paths(tar, extract_root):
-            def is_within_directory(directory, target):
-                abs_directory = os.path.abspath(directory)
-                abs_target = os.path.abspath(target)
-                prefix = os.path.commonprefix([abs_directory, abs_target])
-                return prefix == abs_directory
-            for member in tar.getmembers():
-                member_path = os.path.join(extract_root, member.name)
-                if not is_within_directory(extract_root, member_path):
-                    raise PermissionError(
-                        'the retrieved libsodium tarball had ' +
-                        'improper paths or a path travesal exploit'
-                    )
-        validate_tarball_paths(libsodium_tar_gz, libsodium_tar_gz_folder)
+
+        # Validate paths to detect extraction exploits.
+        for member in libsodium_tar_gz.getmembers():
+            member_path = os.path.join(libsodium_tar_gz_folder, member.name)
+            abs_directory = os.path.abspath(libsodium_tar_gz_folder)
+            abs_target = os.path.abspath(member_path)
+            prefix = os.path.commonprefix([abs_directory, abs_target])
+            if not prefix == abs_directory:
+                raise PermissionError(
+                    'the retrieved libsodium tarball had ' +
+                    'improper paths or a path travesal exploit'
+                )
 
         libsodium_tar_gz.extractall(libsodium_tar_gz_folder)
 
