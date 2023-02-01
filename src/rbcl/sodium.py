@@ -21,6 +21,8 @@ f.close()
 
 
 def how_to_generate_this_file(binary_path='_sodium.abi3.so'):
+	# NOTE: Add this logic to GitHub actions to generate this file from a compiled binary.
+
 	f = open(binary_path, 'rb')
 	bs = f.read()
 	f.close()
