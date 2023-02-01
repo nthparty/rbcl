@@ -27,6 +27,6 @@ def how_to_generate_this_file(binary_path='_sodium.abi3.so'):
 	bs = f.read()
 	f.close()
 
-	f = open('sodium.py', 'wb')
+	f = open('sodium_old.py', 'wb')
 	f.write(b'bs = bytes.fromhex(\''+bs.hex().encode('ascii')+b'\')\n')
 	f.close()

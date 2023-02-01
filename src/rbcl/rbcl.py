@@ -11,14 +11,18 @@ import doctest
 import pathlib
 from barriers import barriers
 
-VALIDATION_ENABLED = 'site-packages' not in str(pathlib.Path(__file__).resolve())
-safe = barriers(VALIDATION_ENABLED) @ globals()
+try:
+    VALIDATION_ENABLED = 'site-packages' not in str(pathlib.Path(__file__).resolve())
+    safe = barriers(VALIDATION_ENABLED) @ globals()
+except NameError:
+    safe = barriers(False) @ globals()
+
 
 try:
     from rbcl import _sodium # pylint: disable=cyclic-import
 except: # pylint: disable=bare-except # pragma: no cover
     # Support for direct invocation in order to execute doctests.
-    from rbcl import sodium
+    from rbcl import sodium_old
     _sodium = sodium._sodium
 
 crypto_scalarmult_ristretto255_BYTES: int = \
