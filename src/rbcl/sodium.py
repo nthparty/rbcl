@@ -5,7 +5,7 @@ directly and exported when the library is invoked without depending on linkage b
 """
 import platform
 import tempfile
-import importlib
+import importlib.util
 
 # Determine OS type
 pl = platform.system()
