@@ -1,9 +1,9 @@
 # Make the new python file
-f = open('_sodium.abi3.so', 'rb')
+f = open('src/rbcl/sodium.so', 'rb')
 bs = f.read()
 f.close()
 
-f = open('sodium.py', 'wb')
+f = open('src/rbcl/sodium.py', 'wb')
 f.write(b'bs = bytes.fromhex(\''+bs.hex().encode('ascii')+b'\')\n')
 
 load_str = """
