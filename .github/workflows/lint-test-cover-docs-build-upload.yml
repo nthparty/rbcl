@@ -96,7 +96,7 @@ jobs:
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" CFLAGS="-mmacosx-version-min=10.9 -march=core2" \
               venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium*.so src/rbcl/sodium.so
-          .venv/bin/python src/rbcl/_sodium.py
+          venv/bin/python src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
