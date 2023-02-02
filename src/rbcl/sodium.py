@@ -24,7 +24,7 @@ sodium_tmp = open(lib_path, "wb")  # pylint: disable=consider-using-with
 sodium_tmp.write(bs)
 
 # Load sodium binary from disk to be used by rbcl.py
-sodium_obj = importlib.util.module_from_spec(
+_sodium = importlib.util.module_from_spec(
     importlib.util.spec_from_file_location("_sodium", lib_path)
 )
 sodium_tmp.close()

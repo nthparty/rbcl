@@ -22,7 +22,7 @@ try:
 except: # pylint: disable=bare-except # pragma: no cover
     # Support for direct invocation in order to execute doctests.
     import sodium  # pylint: disable=wrong-import-position
-    _sodium = sodium.sodium_obj
+    _sodium = sodium._sodium  # pylint: disable=protected-access
 
 
 crypto_scalarmult_ristretto255_BYTES: int = \
