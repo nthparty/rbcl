@@ -21,7 +21,7 @@ try:
     import _sodium
 except:  # pylint: disable=bare-except # pragma: no cover
     # Support for direct invocation in order to execute doctests.
-    import sodium._sodium
+    import sodium._sodium  # pylint: disable=unused-import
 
 
 crypto_scalarmult_ristretto255_BYTES: int = \
