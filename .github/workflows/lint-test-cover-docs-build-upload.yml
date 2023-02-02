@@ -2,7 +2,7 @@ name: lint-test-cover-docs-build-upload
 on:
   push
 env:
-  version: '0.4.2'
+  version: '0.4.5'
 jobs:
   manylinux:
     runs-on: ubuntu-latest
