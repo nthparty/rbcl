@@ -12,7 +12,7 @@ pl = platform.system()
 
 # Read sodium shared object file from disk
 sodium_so = open(  # pylint: disable=consider-using-with
-    "src/rbcl/sodium.pyd" if pl == "Windows" else "src/rbcl/sodium.so", "rb"
+    "src/rbcl/sodium.dll" if pl == "Windows" else "src/rbcl/sodium.so", "rb"
 )
 bs = sodium_so.read()
 sodium_so.close()

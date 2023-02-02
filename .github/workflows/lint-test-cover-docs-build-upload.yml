@@ -207,8 +207,7 @@ jobs:
           mkdir wheelhouse
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
           python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
-          cp build/lib*/rbcl/_sodium.pyd src/rbcl
-          ls src/rbcl/
+          cp build/lib*/rbcl/_sodium.pyd src/rbcl/sodium.dll
           python src/rbcl/_sodium.py
           mv dist/rbcl*.whl wheelhouse
         shell: cmd
