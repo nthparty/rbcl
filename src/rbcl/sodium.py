@@ -16,7 +16,6 @@ sodium_so = open(  # pylint: disable=consider-using-with
 )
 bs = sodium_so.read()
 sodium_so.close()
-bs = bytes.fromhex(bs.hex())
 
 # Generate a temporary file on disk and write sodium binary to it
 LIB_EXT = ".dll" if pl == "Windows" else ".so"
@@ -26,6 +25,6 @@ sodium_tmp.write(bs)
 
 # Load sodium binary from disk to be used by rbcl.py
 sodium_obj = importlib.util.module_from_spec(
-    importlib.util.spec_from_file_location("sodium", lib_path)
+    importlib.util.spec_from_file_location("sodium_obj", lib_path)
 )
 sodium_tmp.close()
