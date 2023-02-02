@@ -17,7 +17,7 @@ try:
 except NameError:
     safe = barriers(False) @ globals()
 
-from rbcl import sodium
+from rbcl import sodium  # pylint: disable=wrong-import-position
 _sodium = sodium.sodium_obj
 
 crypto_scalarmult_ristretto255_BYTES: int = \
