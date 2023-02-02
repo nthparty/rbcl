@@ -22,6 +22,7 @@ LIB_EXT = ".pyd" if pl == "Windows" else ".so"
 lib_path = tempfile.NamedTemporaryFile(suffix=LIB_EXT, delete=False).name  # pylint: disable=consider-using-with
 sodium_tmp = open(lib_path, "wb")  # pylint: disable=consider-using-with
 sodium_tmp.write(bs)
+# Close temp file to avoid multiprocess access error on Windows
 sodium_tmp.close()
 
 # Load sodium binary from disk to be used by rbcl.py
