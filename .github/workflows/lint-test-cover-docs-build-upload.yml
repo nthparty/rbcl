@@ -36,7 +36,8 @@ jobs:
           PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
           LIBSODIUM_MAKE_ARGS="-j$(nproc)" .venv/bin/python setup.py bdist_wheel $PY_LIMITED_API
           cp build/lib*/rbcl/_sodium*.so src/rbcl/sodium.so
-          .venv/bin/python src/rbcl/_sodium_load.py
+          ls src/rbcl
+          .venv/bin/python src/rbcl/sodium.py
           mv dist/rbcl*.whl tmpwheelhouse
           auditwheel repair tmpwheelhouse/rbcl*.whl -w wheelhouse/
       - name: Lint and test module (and compiled libsodium shared library file).
