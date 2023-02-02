@@ -9,6 +9,3 @@ addopts = "--doctest-modules --ignore=docs --cov=rbcl --cov-report term-missing"
 
 [tool.coverage]
 run.omit = ["src/rbcl/sodium_ffi.py"]
-
-[tool.setuptools.package-data]
-"rbcl" = ["sodium.*"]
