@@ -19,7 +19,7 @@ sodium_so.close()
 
 # Generate a temporary file on disk and write sodium binary to it
 LIB_EXT = ".pyd" if pl == "Windows" else ".so"
-lib_path = tempfile.NamedTemporaryFile(suffix=LIB_EXT).name  # pylint: disable=consider-using-with
+lib_path = tempfile.NamedTemporaryFile(suffix=LIB_EXT, delete=False).name  # pylint: disable=consider-using-with
 sodium_tmp = open(lib_path, "wb")  # pylint: disable=consider-using-with
 sodium_tmp.write(bs)
 sodium_tmp.close()
@@ -28,4 +28,3 @@ sodium_tmp.close()
 _sodium = importlib.util.module_from_spec(
     importlib.util.spec_from_file_location("_sodium", lib_path)
 )
-
