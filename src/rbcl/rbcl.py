@@ -18,7 +18,7 @@ except NameError:
     safe = barriers(False) @ globals()
 
 try:
-    from rbcl import _sodium  # pylint: disable=cyclic-import
+    from rbcl.sodium import _sodium  # pylint: disable=cyclic-import
 except: # pylint: disable=bare-except # pragma: no cover
     # Support for direct invocation in order to execute doctests.
     import _sodium
