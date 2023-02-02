@@ -188,7 +188,7 @@ with open('README.rst', 'r') as fh:
     long_description = fh.read()
 
 name = 'rbcl'
-version = '0.4.3'
+version = '0.4.5'
 
 setup(
     name=name,
