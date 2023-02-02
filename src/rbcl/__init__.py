@@ -1,4 +1,5 @@
 """Allow users to use functions directly."""
+from rbcl._sodium import _sodium
 from rbcl.rbcl import \
     crypto_scalarmult_ristretto255, \
     crypto_scalarmult_ristretto255_allow_scalar_zero, \
