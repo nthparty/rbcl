@@ -224,7 +224,8 @@ setup(
     ext_package=name,
     install_requires=[
         'cffi~=1.15',
-        'barriers~=1.0'
+        'barriers~=1.0',
+        'pystache~=0.6'
     ],
     extras_require={
         'build': [
