@@ -12,6 +12,8 @@ import tarfile
 import errno
 import urllib.request
 from distutils.sysconfig import get_config_vars
+
+import setuptools
 from setuptools import Distribution, setup
 from setuptools.command.build_ext import build_ext as _build_ext
 
@@ -203,7 +205,8 @@ setup(
         'build': [
             'setuptools~=62.0',
             'wheel~=0.37',
-            'cffi~=1.15'
+            'cffi~=1.15',
+            'pystache~=0.6'
         ],
         'docs': [
             'sphinx~=4.2.0',
