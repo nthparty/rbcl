@@ -96,7 +96,7 @@ def extract_current_build_path():
     build_dirs = os.listdir("build")
     lib_dir = "lib"
     for item in build_dirs:
-        if "lib" in item:
+        if "lib." in item:
             lib_dir = item
 
     return f"build/{lib_dir}/rbcl/"
