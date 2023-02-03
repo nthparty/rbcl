@@ -38,7 +38,7 @@ jobs:
           mv dist/rbcl*.whl tmpwheelhouse
           auditwheel repair tmpwheelhouse/rbcl*.whl -w wheelhouse/
       - name: Test wheel installation.
-        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall rbcl
+        run: .venv/bin/pip install -f wheelhouse --no-index --force-reinstall rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           .venv/bin/pip install -U .[lint,test]
