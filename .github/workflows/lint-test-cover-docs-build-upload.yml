@@ -154,7 +154,7 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
-          #venv/bin/python -m pylint rbcl # Check against linting rules.
+          venv/bin/python -m pylint rbcl # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
