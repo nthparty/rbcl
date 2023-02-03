@@ -91,22 +91,34 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
 def get_sodium_filename():
     return "_sodium.pyd" if platform.system() == "Windows" else "_sodium.abi3.so"
 
+def extract_current_build_path():
+
+    build_dirs = os.listdir("build")
+    lib_dir = "lib"
+    for item in build_dirs:
+        if "lib" in item:
+            lib_dir = item
+
+    return f"build/{lib_dir}/rbcl/"
+
 def render_sodium():
     """
     Emit compiled sodium binary as hex string in _sodium.py file
     """
 
     data = {
-        "SODIUM_HEX": open(f"src/rbcl/{get_sodium_filename()}", "rb").read().hex()  # pylint: disable=consider-using-with
+        "SODIUM_HEX": open(
+            f"{extract_current_build_path()}/{get_sodium_filename()}", "rb"
+        ).read().hex()
     }
-    template = open("src/rbcl/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
+    template = open(f"{extract_current_build_path()}/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
 
     with open("src/rbcl/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
 def cleanup_sodium():
     try:
-        os.remove(f"src/rbcl/{get_sodium_filename()}")
+        os.remove(f"{extract_current_build_path()}/{get_sodium_filename()}")
     except FileNotFoundError:
         # sodium binary has already been cleaned up
         pass
@@ -199,7 +211,6 @@ class build_clib(_build_clib):
         subprocess.check_call(['make'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'check'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'install'] + make_args, cwd=build_temp)
-        render_sodium()
 
 class build_ext(_build_ext):
     def run(self):
@@ -224,6 +235,9 @@ setup(
     name=name,
     version=version,
     packages=[name],
+    package_data={
+        "": ["*.tmpl"]
+    },
     ext_package=name,
     install_requires=[
         'cffi~=1.15',
