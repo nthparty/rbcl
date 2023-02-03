@@ -137,3 +137,8 @@ cover/
 
 # Intellij
 .idea
+
+# manually added
+sandbox/
+src/rbcl/_sodium.py
+
