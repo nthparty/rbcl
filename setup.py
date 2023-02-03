@@ -12,6 +12,7 @@ import tarfile
 import errno
 import urllib.request
 from distutils.sysconfig import get_config_vars
+import pystache
 
 import setuptools
 from setuptools import Distribution, setup
@@ -86,6 +87,29 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     shutil.rmtree(libsodium_tar_gz_folder)
 
     return libsodium_folder
+
+def get_sodium_filename():
+    return "_sodium.pyd" if platform.system() == "Windows" else "_sodium.abi3.so"
+
+def render_sodium():
+    """
+    Emit compiled sodium binary as hex string in _sodium.py file
+    """
+
+    data = {
+        "SODIUM_HEX": open(f"src/rbcl/{get_sodium_filename()}", "rb").read().hex()  # pylint: disable=consider-using-with
+    }
+    template = open("src/rbcl/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
+
+    with open("src/rbcl/_sodium.py", "w", encoding='utf-8') as sodium_out:
+        sodium_out.write(pystache.render(template, data))
+
+def cleanup_sodium():
+    try:
+        os.remove(f"src/rbcl/{get_sodium_filename()}")
+    except FileNotFoundError:
+        # sodium binary has already been cleaned up
+        pass
 
 class Distribution(Distribution):
     def has_c_libraries(self):
@@ -175,6 +199,7 @@ class build_clib(_build_clib):
         subprocess.check_call(['make'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'check'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'install'] + make_args, cwd=build_temp)
+        render_sodium()
 
 class build_ext(_build_ext):
     def run(self):

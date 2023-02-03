@@ -35,10 +35,10 @@ jobs:
           mkdir tmpwheelhouse
           PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
           LIBSODIUM_MAKE_ARGS="-j$(nproc)" .venv/bin/python setup.py bdist_wheel $PY_LIMITED_API
-          cp build/lib*/rbcl/_sodium*.so src/rbcl/sodium.so
-          .venv/bin/python src/rbcl/render_sodium.py
           mv dist/rbcl*.whl tmpwheelhouse
           auditwheel repair tmpwheelhouse/rbcl*.whl -w wheelhouse/
+      - name: Test wheel installation.
+        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           .venv/bin/pip install -U .[lint,test]
@@ -95,10 +95,8 @@ jobs:
           rm -f dist/*.*
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" CFLAGS="-mmacosx-version-min=10.9 -march=core2" \
               venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
-          cp build/lib*/rbcl/_sodium*.so src/rbcl/sodium.so
-          venv/bin/python src/rbcl/render_sodium.py
       - name: Test wheel installation.
-        run: venv/bin/pip install -f wheelhouse --no-index rbcl
+        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
@@ -147,10 +145,8 @@ jobs:
           rm -f dist/*.*
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64 -arch x86_64" ARCHFLAGS="-arch arm64 -arch x86_64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
               venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
-          cp build/lib*/rbcl/_sodium*.so src/rbcl/sodium.so
-          venv/bin/python src/rbcl/render_sodium.py
       - name: Test wheel installation.
-        run: venv/bin/pip install -f wheelhouse --no-index rbcl
+        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
@@ -207,12 +203,10 @@ jobs:
           mkdir wheelhouse
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
           python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
-          cp build/lib*/rbcl/_sodium.pyd src/rbcl/sodium.pyd
-          python src/rbcl/render_sodium.py
           mv dist/rbcl*.whl wheelhouse
         shell: cmd
       - name: Test wheel installation.
-        run: pip install -f wheelhouse rbcl --no-index
+        run: pip install -f wheelhouse rbcl --no-index --force-reinstall
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           python -m pip install -U pip .[lint,test]
