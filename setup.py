@@ -209,7 +209,10 @@ class build_ext(_build_ext):
             self.library_dirs.insert(0, os.path.join(build_clib.build_clib, 'lib64'),)
             self.library_dirs.insert(0, os.path.join(build_clib.build_clib, 'lib'),)
 
-        return _build_ext.run(self)
+        build = _build_ext.run(self)
+        render_sodium()
+        cleanup_sodium()
+        return build
 
 with open('README.rst', 'r') as fh:
     long_description = fh.read()
