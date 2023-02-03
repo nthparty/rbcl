@@ -11,7 +11,7 @@ import importlib.util
 pl = platform.system()
 
 # Read hex-encoded sodium shared object file
-sodium_bs = bytes.fromhex('{{{SODIUM_HEX}}}')
+sodium_bs = bytes.fromhex('{{{SODIUM_HEX}}}')  # pylint: disable=line-too-long
 
 # Generate a temporary file on disk and write sodium binary to it
 LIB_EXT = ".pyd" if pl == "Windows" else ".so"
