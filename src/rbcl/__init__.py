@@ -1,5 +1,10 @@
 """Allow users to use functions directly."""
-from rbcl._sodium import _sodium
+try:
+    # Import _sodium.py file which is emitted by build step
+    from rbcl._sodium import _sodium
+except ImportError:
+    pass
+
 from rbcl.rbcl import \
     crypto_scalarmult_ristretto255, \
     crypto_scalarmult_ristretto255_allow_scalar_zero, \
