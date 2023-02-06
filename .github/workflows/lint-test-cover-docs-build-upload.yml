@@ -38,6 +38,7 @@ jobs:
           mv dist/rbcl*.whl tmpwheelhouse
           mkdir wheelhouse
           mv tmpwheelhouse/rbcl*.whl wheelhouse/
+          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: .venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
@@ -96,6 +97,7 @@ jobs:
           rm -f dist/*.*
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" CFLAGS="-mmacosx-version-min=10.9 -march=core2" \
               venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
@@ -146,6 +148,7 @@ jobs:
           rm -f dist/*.*
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64 -arch x86_64" ARCHFLAGS="-arch arm64 -arch x86_64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
               venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
@@ -205,6 +208,7 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
           python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
           mv dist/rbcl*.whl wheelhouse
+          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
         shell: cmd
       - name: Test wheel installation.
         run: pip install -f wheelhouse rbcl --no-index --force-reinstall --no-dependencies

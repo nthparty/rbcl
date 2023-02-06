@@ -1,7 +1,7 @@
 """Allow users to use functions directly."""
 try:
     # Import _sodium.py file which is emitted by build step
-    from rbcl._sodium import _sodium
+    from rbcl import _sodium
 except ImportError:
     pass
 
