@@ -94,10 +94,15 @@ def get_sodium_filename():
 def extract_current_build_path():
 
     build_dirs = os.listdir("build")
-    lib_dir = "lib"
+    lib_dir = None
     for item in build_dirs:
         if "lib." in item:
             lib_dir = item
+
+    if lib_dir is None:
+        raise NotADirectoryError(
+            "Could not locate lib.<platform>-<python_version> directory within build directory."
+        )
 
     return f"build/{lib_dir}/rbcl/"
 
@@ -113,7 +118,7 @@ def render_sodium():
     }
     template = open(f"{extract_current_build_path()}/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
 
-    with open("src/rbcl/_sodium.py", "w", encoding='utf-8') as sodium_out:
+    with open(f"{extract_current_build_path()}/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
 def cleanup_sodium():
