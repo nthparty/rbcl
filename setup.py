@@ -124,6 +124,7 @@ def render_sodium():
 def cleanup_sodium():
     try:
         os.remove(f"{extract_current_build_path()}/{get_sodium_filename()}")
+        os.remove(f"{extract_current_build_path()}/sodium_ffi.py")
     except FileNotFoundError:
         # sodium binary has already been cleaned up
         pass
