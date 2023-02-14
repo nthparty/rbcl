@@ -141,14 +141,6 @@ def render_sodium():
     with open(f"{extract_current_build_path()}/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
-def cleanup_sodium():
-    try:
-        os.remove(f"{extract_current_lib_path()}/{get_sodium_filename()}")
-        os.remove(f"{extract_current_build_path()}/sodium_ffi.py")
-    except FileNotFoundError:
-        # sodium binary has already been cleaned up
-        pass
-
 class Distribution(Distribution):
     def has_c_libraries(self):
         # On Windows, only a precompiled dynamic library file is used.
@@ -247,7 +239,6 @@ class build_clib(_build_clib):
         subprocess.check_call(['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'], cwd=lib_temp)  # Invoke gcc to (re-)link dynamically.
 
         render_sodium()
-        cleanup_sodium()
 
 with open('README.rst', 'r') as fh:
     long_description = fh.read()
