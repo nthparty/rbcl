@@ -232,8 +232,21 @@ class build_clib(_build_clib):
 
         # Build dynamic (shared object) library file from the statically compiled archive binary file.
         lib_temp = os.path.join(self.build_clib, 'lib')
+        # If host architecture is arm, extract arm target from libsodium.a file
+        # if it contains multiple target architectures
         if platform.processor() == "arm":
-            subprocess.check_call(['lipo', 'libsodium.a', '-thin', 'arm64', '-output', 'libsodium.a'], cwd=lib_temp)
+            try:
+                subprocess.check_call(['lipo', 'libsodium.a', '-thin', 'arm64', '-output', 'libsodium.a'], cwd=lib_temp)
+            except subprocess.CalledProcessError:
+                pass
+        else:
+            try:
+                # For macOS 11 GH runners, libsodium.a contains multiple target architectures
+                subprocess.check_call(
+                    ['-lipo', 'libsodium.a', '-thin', 'x86_64', '-output', 'libsodium.a'], cwd=lib_temp
+                )
+            except subprocess.CalledProcessError:
+                pass
         subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)  # Explode the archive into many many individual object files.
         import glob
         object_file_relpaths = glob.glob(lib_temp+"/*.o")
