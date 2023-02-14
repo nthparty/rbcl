@@ -138,6 +138,7 @@ jobs:
           sudo installer -pkg python.pkg -target /
           /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m pip install -U virtualenv
           /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
+          venv/bin/python -c 'import platform; print(platform.processor())'
       - name: Install Python dependencies for build process.
         run: |
           venv/bin/pip install -U pip .[build]
