@@ -89,7 +89,7 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     return libsodium_folder
 
 def get_sodium_filename():
-    return "_sodium.pyd" if platform.system() == "Windows" else "_sodium.abi3.so"
+    return "libsodium.dll" if platform.system() == "Windows" else "libsodium.so"
 
 def extract_current_build_path():
 
@@ -246,7 +246,6 @@ setup(
     },
     ext_package=name,
     install_requires=[
-        'cffi~=1.15',
         'barriers~=1.0',
         'pystache~=0.6'
     ],
@@ -254,7 +253,6 @@ setup(
         'build': [
             'setuptools~=62.0',
             'wheel~=0.37',
-            'cffi~=1.15',
             'pystache~=0.6'
         ],
         'docs': [
@@ -283,7 +281,6 @@ setup(
                 'wrappers for its Ristretto group functions.',
     long_description=long_description,
     long_description_content_type='text/x-rst',
-    cffi_modules=['src/rbcl/sodium_ffi.py:sodium_ffi'],
     cmdclass={
         'build_clib': build_clib,
         'build_ext': build_ext,

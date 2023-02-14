@@ -6,6 +6,7 @@ directly and exported when the library is invoked without depending on linkage b
 import platform
 import tempfile
 import importlib.util
+from ctypes import cdll
 
 # Determine OS type
 pl = platform.system()
@@ -22,6 +23,6 @@ sodium_tmp.write(sodium_bs)
 sodium_tmp.close()
 
 # Load sodium binary from disk to be used by rbcl.py
-_sodium = importlib.util.module_from_spec(
-    importlib.util.spec_from_file_location("_sodium", lib_path)
-)
+_sodium = cdll.LoadLibrary(lib_path)
+# assert _sodium.sodium_init() == 0
+# assert _sodium.sodium_init() == 1
