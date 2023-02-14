@@ -230,7 +230,7 @@ class build_clib(_build_clib):
         subprocess.check_call(['make', 'check'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'install'] + make_args, cwd=build_temp)
 
-        # Build dynamic (shared object) library file from the staticly compiled archive binary file.
+        # Build dynamic (shared object) library file from the statically compiled archive binary file.
         lib_temp = os.path.join(self.build_clib, 'lib')
         if platform.processor() == "arm":
             subprocess.check_call(['lipo', 'libsodium.a', '-thin', 'arm64', '-output', 'libsodium.a'], cwd=lib_temp)
