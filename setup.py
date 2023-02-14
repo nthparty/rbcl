@@ -243,7 +243,7 @@ class build_clib(_build_clib):
             try:
                 # For macOS 11 GH runners, libsodium.a contains multiple target architectures
                 subprocess.check_call(
-                    ['-lipo', 'libsodium.a', '-thin', 'x86_64', '-output', 'libsodium.a'], cwd=lib_temp
+                    ['lipo', 'libsodium.a', '-thin', 'x86_64', '-output', 'libsodium.a'], cwd=lib_temp
                 )
             except subprocess.CalledProcessError:
                 pass
