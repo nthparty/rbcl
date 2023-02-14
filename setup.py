@@ -232,6 +232,8 @@ class build_clib(_build_clib):
 
         # Build dynamic (shared object) library file from the staticly compiled archive binary file.
         lib_temp = os.path.join(self.build_clib, 'lib')
+        if platform.processor() == "arm":
+            subprocess.check_call(['lipo', 'libsodium.a', '-thin', 'arm64', '-output', 'libsodium.a'], cwd=lib_temp)
         subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)  # Explode the archive into many many individual object files.
         import glob
         object_file_relpaths = glob.glob(lib_temp+"/*.o")

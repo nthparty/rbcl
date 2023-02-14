@@ -118,57 +118,57 @@ jobs:
         with:
           name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
           path: rbcl-wheelhouse/
-#  macos-arm:
-#    runs-on: macos-11
-#    strategy:
-#      matrix:
-#        python:
-#          - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
-#          - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
-#    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Download libsodium source tree archive.
-#        run: |
-#          wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
-#          mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
-#      - name: Install Python.
-#        run: |
-#          curl "https://www.python.org/ftp/python/${{ matrix.python.version-url }}/python-${{ matrix.python.version-url }}-macos11.pkg" -o python.pkg
-#          sudo installer -pkg python.pkg -target /
-#          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m pip install -U virtualenv
-#          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
-#      - name: Install Python dependencies for build process.
-#        run: |
-#          venv/bin/pip install -U pip .[build]
-#      - name: Build wheel file.
-#        run: |
-#          mkdir wheelhouse
-#          PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
-#          rm -f dist/*.*
-#          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64 -arch x86_64" ARCHFLAGS="-arch arm64 -arch x86_64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
-#              venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
-#          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
-#      - name: Test wheel installation.
-#        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
-#      - name: Lint and test module (and compiled libsodium shared library file).
-#        run: |
-#          venv/bin/pip install -U pip .[lint,test]
-#          venv/bin/python -m pylint rbcl # Check against linting rules.
-#          venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
-#          venv/bin/python -m pytest # Run tests.
-#      - name: Test auto-generation of documentation.
-#        run: |
-#          venv/bin/pip install -U .[docs]
-#          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && cd ..
-#      - name: Upload wheel file.
-#        run: |
-#          mkdir rbcl-wheelhouse
-#          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
-#      - uses: actions/upload-artifact@v1
-#        with:
-#          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
-#          path: rbcl-wheelhouse/
+  macos-arm:
+    runs-on: macos-11
+    strategy:
+      matrix:
+        python:
+          - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
+          - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
+    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download libsodium source tree archive.
+        run: |
+          wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
+          mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
+      - name: Install Python.
+        run: |
+          curl "https://www.python.org/ftp/python/${{ matrix.python.version-url }}/python-${{ matrix.python.version-url }}-macos11.pkg" -o python.pkg
+          sudo installer -pkg python.pkg -target /
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m pip install -U virtualenv
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
+      - name: Install Python dependencies for build process.
+        run: |
+          venv/bin/pip install -U pip .[build]
+      - name: Build wheel file.
+        run: |
+          mkdir wheelhouse
+          PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
+          rm -f dist/*.*
+          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64 -arch x86_64" ARCHFLAGS="-arch arm64 -arch x86_64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
+              venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
+      - name: Test wheel installation.
+        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
+      - name: Lint and test module (and compiled libsodium shared library file).
+        run: |
+          venv/bin/pip install -U pip .[lint,test]
+          venv/bin/python -m pylint rbcl # Check against linting rules.
+          venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
+          venv/bin/python -m pytest # Run tests.
+      - name: Test auto-generation of documentation.
+        run: |
+          venv/bin/pip install -U .[docs]
+          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && cd ..
+      - name: Upload wheel file.
+        run: |
+          mkdir rbcl-wheelhouse
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
+      - uses: actions/upload-artifact@v1
+        with:
+          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
+          path: rbcl-wheelhouse/
 #  windows:
 #    runs-on: windows-latest
 #    strategy:
