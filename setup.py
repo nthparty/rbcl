@@ -238,28 +238,16 @@ class build_clib(_build_clib):
         subprocess.check_call(['make', 'check'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'install'] + make_args, cwd=build_temp)
 
-        try:
-            print(os.path.join(self.build_clib, 'lib'))
-        except:
-            pass
-
-        # if self.distribution.has_c_libraries():
-        self.include_dirs.append(os.path.join(self.build_clib, 'include'),)
-        # self.library_dirs.insert(0, os.path.join(self.build_clib, 'lib64'),)
-        # self.library_dirs.insert(0, os.path.join(self.build_clib, 'lib'),)
-
+        # Build dynamic (shared object) library file from the staticly compiled archive binary file.
         lib_temp = os.path.join(self.build_clib, 'lib')
-        subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)
+        subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)  # Explode the archive into many many individual object files.
         import glob
         object_file_relpaths = glob.glob(lib_temp+"/*.o")
         object_file_names = [o.split('/')[-1] for o in object_file_relpaths]
-        # subprocess.check_call(['gcc', '-dynamiclib'] + object_file_names + ['-o', 'libsodium.so'] + make_args, cwd=lib_temp)
-        subprocess.check_call(['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'] + make_args, cwd=lib_temp)
+        subprocess.check_call(['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'], cwd=lib_temp)  # Invoke gcc to (re-)link dynamically.
 
-        # while True: a = 1# build = _build_ext.run(self)
         render_sodium()
         cleanup_sodium()
-        # return build
 
 with open('README.rst', 'r') as fh:
     long_description = fh.read()
