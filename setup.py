@@ -99,12 +99,32 @@ def extract_current_build_path():
         if "lib." in item:
             lib_dir = item
 
+    if lib_dir is None:  # If still None, then settle for just 'lib' with no '.'.
+        for item in build_dirs:
+            if "lib" in item:
+                lib_dir = item
+
     if lib_dir is None:
         raise NotADirectoryError(
             "Could not locate lib.<platform>-<python_version> directory within build directory."
         )
 
     return f"build/{lib_dir}/rbcl/"
+
+def extract_current_lib_path():
+
+    build_dirs = os.listdir("build")
+    lib_dir = None
+    for item in build_dirs:
+        if "temp." in item:
+            lib_dir = item
+
+    if lib_dir is None:
+        raise NotADirectoryError(
+            "Could not locate lib.<platform>-<python_version> directory within build directory."
+        )
+
+    return f"build/{lib_dir}/lib/"
 
 def render_sodium():
     """
@@ -113,7 +133,7 @@ def render_sodium():
 
     data = {
         "SODIUM_HEX": open(
-            f"{extract_current_build_path()}/{get_sodium_filename()}", "rb"
+            f"{extract_current_lib_path()}/{get_sodium_filename()}", "rb"
         ).read().hex()
     }
     template = open(f"{extract_current_build_path()}/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
@@ -123,7 +143,7 @@ def render_sodium():
 
 def cleanup_sodium():
     try:
-        os.remove(f"{extract_current_build_path()}/{get_sodium_filename()}")
+        os.remove(f"{extract_current_lib_path()}/{get_sodium_filename()}")
         os.remove(f"{extract_current_build_path()}/sodium_ffi.py")
     except FileNotFoundError:
         # sodium binary has already been cleaned up
@@ -218,18 +238,28 @@ class build_clib(_build_clib):
         subprocess.check_call(['make', 'check'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'install'] + make_args, cwd=build_temp)
 
-class build_ext(_build_ext):
-    def run(self):
-        if self.distribution.has_c_libraries():
-            build_clib = self.get_finalized_command('build_clib')
-            self.include_dirs.append(os.path.join(build_clib.build_clib, 'include'),)
-            self.library_dirs.insert(0, os.path.join(build_clib.build_clib, 'lib64'),)
-            self.library_dirs.insert(0, os.path.join(build_clib.build_clib, 'lib'),)
+        try:
+            print(os.path.join(self.build_clib, 'lib'))
+        except:
+            pass
 
-        build = _build_ext.run(self)
+        # if self.distribution.has_c_libraries():
+        self.include_dirs.append(os.path.join(self.build_clib, 'include'),)
+        # self.library_dirs.insert(0, os.path.join(self.build_clib, 'lib64'),)
+        # self.library_dirs.insert(0, os.path.join(self.build_clib, 'lib'),)
+
+        lib_temp = os.path.join(self.build_clib, 'lib')
+        subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)
+        import glob
+        object_file_relpaths = glob.glob(lib_temp+"/*.o")
+        object_file_names = [o.split('/')[-1] for o in object_file_relpaths]
+        # subprocess.check_call(['gcc', '-dynamiclib'] + object_file_names + ['-o', 'libsodium.so'] + make_args, cwd=lib_temp)
+        subprocess.check_call(['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'] + make_args, cwd=lib_temp)
+
+        # while True: a = 1# build = _build_ext.run(self)
         render_sodium()
         cleanup_sodium()
-        return build
+        # return build
 
 with open('README.rst', 'r') as fh:
     long_description = fh.read()
@@ -283,7 +313,6 @@ setup(
     long_description_content_type='text/x-rst',
     cmdclass={
         'build_clib': build_clib,
-        'build_ext': build_ext,
     },
     distclass=Distribution,
     zip_safe=False

@@ -19,10 +19,10 @@ except NameError:
 safe = barriers(VALIDATION_ENABLED) @ globals()
 
 try:
-    import _sodium._sodium
-except:  # pylint: disable=bare-except # pragma: no cover
     # Support for direct invocation in order to execute doctests.
     from _sodium import _sodium
+except:  # pylint: disable=bare-except # pragma: no cover
+    from rbcl._sodium import _sodium
 
 
 crypto_scalarmult_ristretto255_BYTES: int = \
