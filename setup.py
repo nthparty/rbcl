@@ -146,10 +146,9 @@ def render_sodium():
     with open(f"{extract_current_build_path()}/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
-# class Distribution(Distribution):
-#     def has_c_libraries(self):
-#         # On Windows, only a precompiled dynamic library file is used.
-#         return not sys.platform == 'win32'
+class Distribution(Distribution):
+    def has_c_libraries(self):
+        return True
 
 def extract_sodium_from_static(lib_temp: str):
     """
