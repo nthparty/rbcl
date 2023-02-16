@@ -13,10 +13,7 @@ import errno
 import urllib.request
 from distutils.sysconfig import get_config_vars
 import pystache
-
-import setuptools
 from setuptools import Distribution, setup
-from setuptools.command.build_ext import build_ext as _build_ext
 
 try:
     from setuptools.command.build_clib import build_clib as _build_clib
@@ -68,7 +65,7 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
             if not prefix == abs_directory:
                 raise PermissionError(
                     'the retrieved libsodium tarball had ' +
-                    'improper paths or a path travesal exploit'
+                    'improper paths or a path traversal exploit'
                 )
 
         libsodium_tar_gz.extractall(libsodium_tar_gz_folder)
@@ -88,9 +85,6 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
 
     return libsodium_folder
 
-def get_sodium_filename():
-    return "libsodium.dll" if platform.system() == "Windows" else "libsodium.so"
-
 def extract_current_build_path():
 
     build_dirs = os.listdir("build")
@@ -109,7 +103,7 @@ def extract_current_build_path():
             "Could not locate lib.<platform>-<python_version> directory within build directory."
         )
 
-    return f"build/{lib_dir}/rbcl/"
+    return f"build{os.sep}{lib_dir}{os.sep}rbcl{os.sep}"
 
 def extract_current_lib_path():
 
@@ -131,9 +125,18 @@ def render_sodium():
     Emit compiled sodium binary as hex string in _sodium.py file
     """
 
+    if os.environ.get('LIB', None) is None and platform.system() == "Windows":
+        raise EnvironmentError(
+            "For Windows builds, environment variable $LIB must be set to path to libsodium directory"
+        )
+
+    path_to_sodium = \
+        f"{os.environ.get('LIB')}\\libsodium.dll" if platform.system() == "Windows" \
+        else f"{extract_current_lib_path()}/libsodium.so"
+
     data = {
         "SODIUM_HEX": open(
-            f"{extract_current_lib_path()}/{get_sodium_filename()}", "rb"
+            path_to_sodium, "rb"
         ).read().hex()
     }
     template = open(f"{extract_current_build_path()}/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
@@ -166,6 +169,7 @@ class build_clib(_build_clib):
     def run(self):
         # On Windows, only a precompiled dynamic library file is used.
         if sys.platform == 'win32':
+            render_sodium()
             return
 
         # Confirm that make utility can be found.
@@ -237,7 +241,7 @@ class build_clib(_build_clib):
         if platform.processor() == "arm":
             try:
                 subprocess.check_call(['lipo', 'libsodium.a', '-thin', 'arm64', '-output', 'libsodium.a'], cwd=lib_temp)
-            except subprocess.CalledProcessError:
+            except:
                 pass
         else:
             try:
@@ -245,7 +249,7 @@ class build_clib(_build_clib):
                 subprocess.check_call(
                     ['lipo', 'libsodium.a', '-thin', 'x86_64', '-output', 'libsodium.a'], cwd=lib_temp
                 )
-            except subprocess.CalledProcessError:
+            except:
                 pass
         subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)  # Explode the archive into many many individual object files.
         import glob

@@ -29,7 +29,9 @@ jobs:
           /opt/python/${{ matrix.python.version-abi }}-${{ matrix.python.version-abi-suffix }}/bin/python -m pip install virtualenv
           /opt/python/${{ matrix.python.version-abi }}-${{ matrix.python.version-abi-suffix }}/bin/python -m virtualenv .venv
       - name: Install Python dependencies for build process.
-        run: .venv/bin/pip install -U pip .[build]
+        run: |
+          .venv/bin/python -c 'import sys; import platform; print(platform.system()); print(sys.platform())'
+          .venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
           mkdir tmpwheelhouse
@@ -89,6 +91,7 @@ jobs:
           /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
+          venv/bin/python -c 'import sys; import platform; print(platform.system()); print(sys.platform())'
           venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
@@ -140,6 +143,7 @@ jobs:
           /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
+          venv/bin/python -c 'import sys; import platform; print(platform.system()); print(sys.platform())'
           venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
@@ -169,66 +173,69 @@ jobs:
         with:
           name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
           path: rbcl-wheelhouse/
-#  windows:
-#    runs-on: windows-latest
-#    strategy:
-#      matrix:
-#        windows:
-#          - {version: 'win32', arch: 'x86', arch-sodium: 'Win32', arch-vs: 'x86'}
-#          - {version: 'win_amd64', arch: 'x64', arch-sodium: 'x64', arch-vs: 'amd64'}
-#        python:
-#          - {version: "3.7", version-abi: "cp37"}
-#          - {version: "3.8", version-abi: "cp38"}
-#          - {version: "3.9", version-abi: "cp39"}
-#          - {version: "3.10", version-abi: "cp310"}
-#    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Download and extract libsodium dynamic library file.
-#        run: |
-#          wget -O c:\libsodium-1.0.18-msvc.zip https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18-msvc.zip
-#          Expand-Archive c:\libsodium-1.0.18-msvc.zip -DestinationPath c:\
-#        shell: powershell
-#      - name: Add environment variables for libsodium.
-#        run: |
-#          echo "INCLUDE=C:/libsodium/include;$INCLUDE" >> $GITHUB_ENV
-#          echo "LIB=C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/static;$LIB" >> $GITHUB_ENV
-#        shell: bash
-#      - name: Install Python.
-#        uses: actions/setup-python@v2.2.2
-#        with:
-#          python-version: ${{ matrix.python.version }}
-#          architecture: ${{ matrix.windows.arch }}
-#      - name: Install Python dependencies for build process.
-#        run: python -m pip install -U pip .[build]
-#        shell: bash
-#      - name: Build wheel file.
-#        run: |
-#          mkdir wheelhouse
-#          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
-#          python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
-#          mv dist/rbcl*.whl wheelhouse
-#          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
-#        shell: cmd
-#      - name: Test wheel installation.
-#        run: pip install -f wheelhouse rbcl --no-index --force-reinstall --no-dependencies
-#      - name: Lint and test module (and compiled libsodium shared library file).
-#        run: |
-#          python -m pip install -U pip .[lint,test]
-#          python -m pylint rbcl # Check against linting rules.
-#          python src/rbcl/rbcl.py -v # Run doctests.
-#          python -m pytest # Run tests.
-#      - name: Test auto-generation of documentation.
-#        run: |
-#          python -m pip install -U .[docs]
-#          cd docs
-#          sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/bcl/sodium_ffi.py
-#          cd ..
-#      - name: Upload wheel file.
-#        run: |
-#          mkdir rbcl-wheelhouse
-#          move wheelhouse\rbcl*.whl rbcl-wheelhouse\
-#      - uses: actions/upload-artifact@v1
-#        with:
-#          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
-#          path: rbcl-wheelhouse\
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        windows:
+          - {version: 'win32', arch: 'x86', arch-sodium: 'Win32', arch-vs: 'x86'}
+          - {version: 'win_amd64', arch: 'x64', arch-sodium: 'x64', arch-vs: 'amd64'}
+        python:
+          - {version: "3.7", version-abi: "cp37"}
+          - {version: "3.8", version-abi: "cp38"}
+          - {version: "3.9", version-abi: "cp39"}
+          - {version: "3.10", version-abi: "cp310"}
+    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download and extract libsodium dynamic library file.
+        run: |
+          wget -O c:\libsodium-1.0.18-msvc.zip https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18-msvc.zip
+          Expand-Archive c:\libsodium-1.0.18-msvc.zip -DestinationPath c:\
+        shell: powershell
+      - name: Add environment variables for libsodium.
+        run: |
+          echo "INCLUDE=C:/libsodium/include;$INCLUDE" >> $GITHUB_ENV
+          echo "LIB=C:\libsodium\${{ matrix.windows.arch-sodium }}\release\v142\dynamic\" >> $GITHUB_ENV
+        shell: bash
+      - name: Install Python.
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ matrix.python.version }}
+          architecture: ${{ matrix.windows.arch }}
+      - name: Install Python dependencies for build process.
+        run: |
+          python -c 'import sys; import platform; print(platform.system()); print(sys.platform())'
+          python -m pip install -U pip .[build]
+        shell: bash
+      - name: Build wheel file.
+        run: |
+          mkdir wheelhouse
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
+          python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
+          mv dist/rbcl*.whl wheelhouse
+          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
+        shell: cmd
+      - name: Test wheel installation.
+        run: pip install -f wheelhouse rbcl --no-index --force-reinstall --no-dependencies
+      - name: Lint and test module (and compiled libsodium shared library file).
+        run: |
+          python -m pip install -U pip .[lint,test]
+          python -m pylint rbcl # Check against linting rules.
+          python src/rbcl/rbcl.py -v # Run doctests.
+          python -m pytest # Run tests.
+      - name: Test auto-generation of documentation.
+        run: |
+          python -m pip install -U .[docs]
+          cd docs
+          sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/bcl/sodium_ffi.py
+          cd ..
+      - name: Upload wheel file.
+        run: |
+          mkdir rbcl-wheelhouse
+          move wheelhouse\rbcl*.whl rbcl-wheelhouse\
+      - uses: actions/upload-artifact@v1
+        with:
+          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
+          path: rbcl-wheelhouse\
+
