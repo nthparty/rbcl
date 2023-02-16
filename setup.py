@@ -133,7 +133,7 @@ def render_sodium():
         )
 
     path_to_sodium = \
-        f"{os.environ.get('LIB')}\\libsodium.dll" if sys.platform == "win32" \
+        f"{os.environ.get('LIB')}/libsodium.dll" if sys.platform == "win32" \
         else f"{extract_current_lib_path()}/libsodium.so"
 
     data = {
