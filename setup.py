@@ -125,15 +125,15 @@ def render_sodium():
     Emit compiled sodium binary as hex string in _sodium.py file
     """
 
+    print("\n\nmade it here\n\n")
+
     if os.environ.get('LIB', None) is None and sys.platform == "win32":
         raise EnvironmentError(
             "For Windows builds, environment variable $LIB must be set to path to libsodium directory"
         )
 
-    print(os.environ.get('LIB'))
-
     path_to_sodium = \
-        f"{os.environ.get('LIB')}/libsodium.dll" if sys.platform == "win32" \
+        f"{os.environ.get('LIB')}\\libsodium.dll" if sys.platform == "win32" \
         else f"{extract_current_lib_path()}/libsodium.so"
 
     data = {
@@ -146,10 +146,10 @@ def render_sodium():
     with open(f"{extract_current_build_path()}/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
-class Distribution(Distribution):
-    def has_c_libraries(self):
-        # On Windows, only a precompiled dynamic library file is used.
-        return not sys.platform == 'win32'
+# class Distribution(Distribution):
+#     def has_c_libraries(self):
+#         # On Windows, only a precompiled dynamic library file is used.
+#         return not sys.platform == 'win32'
 
 def extract_sodium_from_static(lib_temp: str):
     """

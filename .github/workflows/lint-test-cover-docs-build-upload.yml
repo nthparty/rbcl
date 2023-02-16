@@ -212,7 +212,7 @@ jobs:
           mv dist/rbcl*.whl wheelhouse
           dir C:\libsodium\${{ matrix.windows.arch-sodium }}\release\v142\dynamic\
           dir build\lib\rbcl\
-          cp build\lib*\rbcl\_sodium.py src\rbcl\_sodium.py
+          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
         shell: cmd
       - name: Test wheel installation.
         run: pip install -f wheelhouse rbcl --no-index --force-reinstall --no-dependencies
