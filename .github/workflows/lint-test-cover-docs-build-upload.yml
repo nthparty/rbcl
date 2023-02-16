@@ -210,7 +210,8 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
           python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
           mv dist/rbcl*.whl wheelhouse
-          dir build
+          dir C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/
+          dir build/lib/rbcl/
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
         shell: cmd
       - name: Test wheel installation.

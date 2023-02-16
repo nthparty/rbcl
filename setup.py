@@ -125,13 +125,15 @@ def render_sodium():
     Emit compiled sodium binary as hex string in _sodium.py file
     """
 
-    if os.environ.get('LIB', None) is None and platform.system() == "Windows":
+    if os.environ.get('LIB', None) is None and sys.platform == "win32":
         raise EnvironmentError(
             "For Windows builds, environment variable $LIB must be set to path to libsodium directory"
         )
 
+    print(os.environ.get('LIB'))
+
     path_to_sodium = \
-        f"{os.environ.get('LIB')}/libsodium.dll" if platform.system() == "Windows" \
+        f"{os.environ.get('LIB')}/libsodium.dll" if sys.platform == "win32" \
         else f"{extract_current_lib_path()}/libsodium.so"
 
     data = {
