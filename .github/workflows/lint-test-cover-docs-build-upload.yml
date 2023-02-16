@@ -193,7 +193,7 @@ jobs:
       - name: Add environment variables for libsodium.
         run: |
           echo "INCLUDE=C:/libsodium/include;$INCLUDE" >> $GITHUB_ENV
-          echo "LIB=C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/;$LIB" >> $GITHUB_ENV
+          echo "LIB=C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/$LIB" >> $GITHUB_ENV
         shell: bash
       - name: Install Python.
         uses: actions/setup-python@v2.2.2
