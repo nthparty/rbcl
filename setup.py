@@ -103,7 +103,7 @@ def extract_current_build_path():
             "Could not locate lib.<platform>-<python_version> directory within build directory."
         )
 
-    return f"build{os.sep}{lib_dir}{os.sep}rbcl{os.sep}"
+    return f"build/{lib_dir}/rbcl/"
 
 def extract_current_lib_path():
 
@@ -131,7 +131,7 @@ def render_sodium():
         )
 
     path_to_sodium = \
-        f"{os.environ.get('LIB')}\\libsodium.dll" if platform.system() == "Windows" \
+        f"{os.environ.get('LIB')}/libsodium.dll" if platform.system() == "Windows" \
         else f"{extract_current_lib_path()}/libsodium.so"
 
     data = {
