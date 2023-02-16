@@ -30,7 +30,6 @@ jobs:
           /opt/python/${{ matrix.python.version-abi }}-${{ matrix.python.version-abi-suffix }}/bin/python -m virtualenv .venv
       - name: Install Python dependencies for build process.
         run: |
-          .venv/bin/python -c 'import sys; import platform; print(platform.system()); print(sys.platform)'
           .venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
@@ -91,7 +90,6 @@ jobs:
           /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
-          venv/bin/python -c 'import sys; import platform; print(platform.system()); print(sys.platform)'
           venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
@@ -143,7 +141,6 @@ jobs:
           /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
       - name: Install Python dependencies for build process.
         run: |
-          venv/bin/python -c 'import sys; import platform; print(platform.system()); print(sys.platform)'
           venv/bin/pip install -U pip .[build]
       - name: Build wheel file.
         run: |
@@ -196,7 +193,7 @@ jobs:
       - name: Add environment variables for libsodium.
         run: |
           echo "INCLUDE=C:/libsodium/include;$INCLUDE" >> $GITHUB_ENV
-          echo "LIB=C:\libsodium\${{ matrix.windows.arch-sodium }}\release\v142\dynamic\" >> $GITHUB_ENV
+          echo "LIB=C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/;$LIB" >> $GITHUB_ENV
         shell: bash
       - name: Install Python.
         uses: actions/setup-python@v2.2.2
@@ -205,7 +202,6 @@ jobs:
           architecture: ${{ matrix.windows.arch }}
       - name: Install Python dependencies for build process.
         run: |
-          python -c 'import sys; import platform; print(platform.system()); print(sys.platform)'
           python -m pip install -U pip .[build]
         shell: bash
       - name: Build wheel file.
