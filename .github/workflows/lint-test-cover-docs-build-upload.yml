@@ -76,6 +76,10 @@ jobs:
           - {version: '3.8', version-abi: 'cp38', version-url: '3.8.9'}
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
+    env:
+      LIBSODIUM_MAKE_ARGS: -j$(sysctl -n hw.ncpu)
+      PY_LIMITED_API: --py-limited-api=${{ matrix.python.version-abi }}
+      CFLAGS: -mmacosx-version-min=10.9 -march=core2
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -94,10 +98,8 @@ jobs:
       - name: Build wheel file.
         run: |
           mkdir wheelhouse
-          PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
           rm -f dist/*.*
-          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" CFLAGS="-mmacosx-version-min=10.9 -march=core2" \
-              venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+          venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
@@ -210,8 +212,6 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
           python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
           mv dist/rbcl*.whl wheelhouse
-          dir C:\libsodium\${{ matrix.windows.arch-sodium }}\release\v142\dynamic\
-          dir build\lib\rbcl\
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
         shell: cmd
       - name: Test wheel installation.

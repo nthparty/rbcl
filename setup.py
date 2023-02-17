@@ -86,6 +86,9 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     return libsodium_folder
 
 def extract_current_build_path():
+    """
+    Extract path to current rbcl build directory
+    """
 
     build_dirs = os.listdir("build")
     lib_dir = None
@@ -106,6 +109,9 @@ def extract_current_build_path():
     return f"build/{lib_dir}/rbcl/"
 
 def extract_current_lib_path():
+    """
+    Extract path to temp.<platform>-<arch>-<python_version> compiled libsodium library
+    """
 
     build_dirs = os.listdir("build")
     lib_dir = None
@@ -125,13 +131,12 @@ def render_sodium():
     Emit compiled sodium binary as hex string in _sodium.py file
     """
 
-    print("\n\nmade it here\n\n")
-
     if os.environ.get('LIB', None) is None and sys.platform == "win32":
         raise EnvironmentError(
             "For Windows builds, environment variable $LIB must be set to path to libsodium directory"
         )
 
+    # Extract path to compiled libsodium binary
     path_to_sodium = \
         f"{os.environ.get('LIB')}/libsodium.dll" if sys.platform == "win32" \
         else f"{extract_current_lib_path()}/libsodium.so"
@@ -143,14 +148,18 @@ def render_sodium():
     }
     template = open(f"{extract_current_build_path()}/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
 
+    # Emit rendered file to build directory
     with open(f"{extract_current_build_path()}/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
 class Distribution(Distribution):
     def has_c_libraries(self):
+        # Even though libsodium for Windows includes a precompiled libsodium.dll binary,
+        # we still need to call render_sodium() for windows builds in the build_clib.run
+        # function, which only gets triggered if this function returns True
         return True
 
-def extract_sodium_from_static(lib_temp: str):
+def extract_sodium_from_static_archive(lib_temp: str):
     """
     For certain versions of macOS, the libsodium.a contains multiple target architectures.
     Calls to subprocess are wrapped in a try/except because only certain macOS GH runners contain
@@ -258,7 +267,7 @@ class build_clib(_build_clib):
 
         # Different macOS GH runners contain either single or multi-target static archives
         if sys.platform == "darwin":
-            extract_sodium_from_static(lib_temp)
+            extract_sodium_from_static_archive(lib_temp)
 
         # Explode the archive into many individual object files.
         subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)
