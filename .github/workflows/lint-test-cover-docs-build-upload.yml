@@ -77,9 +77,7 @@ jobs:
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
     env:
-      LIBSODIUM_MAKE_ARGS: -j$(sysctl -n hw.ncpu)
       PY_LIMITED_API: --py-limited-api=${{ matrix.python.version-abi }}
-      CFLAGS: -mmacosx-version-min=10.9 -march=core2
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -99,7 +97,8 @@ jobs:
         run: |
           mkdir wheelhouse
           rm -f dist/*.*
-          venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" CFLAGS="-mmacosx-version-min=10.9 -march=core2" \
+              venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
