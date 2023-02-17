@@ -15,6 +15,8 @@ jobs:
           - {version: "3.9", version-abi: "cp39", version-abi-suffix: "cp39"}
           - {version: "3.10", version-abi: "cp310", version-abi-suffix: "cp310"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for manylinux2014_x86_64"
+    env:
+      PY_LIMITED_API: --py-limited-api=${{ matrix.python.version-abi }}
     steps:
       - uses: actions/checkout@v2
       - name: Install development dependencies.
@@ -34,7 +36,6 @@ jobs:
       - name: Build wheel file.
         run: |
           mkdir tmpwheelhouse
-          PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
           LIBSODIUM_MAKE_ARGS="-j$(nproc)" .venv/bin/python setup.py bdist_wheel $PY_LIMITED_API
           mv dist/rbcl*.whl tmpwheelhouse
           mkdir wheelhouse
@@ -128,6 +129,8 @@ jobs:
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
           - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
+    env:
+      PY_LIMITED_API: --py-limited-api=${{ matrix.python.version-abi }}
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -146,7 +149,6 @@ jobs:
       - name: Build wheel file.
         run: |
           mkdir wheelhouse
-          PY_LIMITED_API="--py-limited-api=${{ matrix.python.version-abi }}"
           rm -f dist/*.*
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64 -arch x86_64" ARCHFLAGS="-arch arm64 -arch x86_64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
               venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
@@ -184,6 +186,9 @@ jobs:
           - {version: "3.9", version-abi: "cp39"}
           - {version: "3.10", version-abi: "cp310"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
+    env:
+      INCLUDE: C:/libsodium/include
+      LIB: C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/
     steps:
       - uses: actions/checkout@v2
       - name: Download and extract libsodium dynamic library file.
@@ -191,11 +196,6 @@ jobs:
           wget -O c:\libsodium-1.0.18-msvc.zip https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18-msvc.zip
           Expand-Archive c:\libsodium-1.0.18-msvc.zip -DestinationPath c:\
         shell: powershell
-      - name: Add environment variables for libsodium.
-        run: |
-          echo "INCLUDE=C:/libsodium/include;$INCLUDE" >> $GITHUB_ENV
-          echo "LIB=C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/$LIB" >> $GITHUB_ENV
-        shell: bash
       - name: Install Python.
         uses: actions/setup-python@v2.2.2
         with:
