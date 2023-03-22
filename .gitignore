@@ -141,4 +141,4 @@ cover/
 # manually added
 sandbox/
 src/rbcl/_sodium.py
-
+venv2/

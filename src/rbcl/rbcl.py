@@ -24,7 +24,6 @@ try:
 except:  # pylint: disable=bare-except # pragma: no cover
     from rbcl._sodium import _sodium
 
-
 crypto_scalarmult_ristretto255_BYTES: int = \
     _sodium.crypto_scalarmult_ristretto255_bytes()
 crypto_scalarmult_ristretto255_SCALARBYTES: int = \

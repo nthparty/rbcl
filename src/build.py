@@ -1,6 +1,4 @@
-"""
-Setup, package, and build file.
-"""
+""" Build script invoked by setuptools """
 import sys
 import platform
 import os
@@ -13,12 +11,13 @@ import errno
 import urllib.request
 from distutils.sysconfig import get_config_vars
 import pystache
-from setuptools import Distribution, setup
+from setuptools import Distribution
 
 try:
     from setuptools.command.build_clib import build_clib as _build_clib
 except ImportError:
     from distutils.command.build_clib import build_clib as _build_clib
+
 
 def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     """
@@ -33,8 +32,8 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     # URL from which libsodium source archive is retrieved,
     # and paths into which it is extracted and then moved.
     url = (
-        'https://github.com/jedisct1/libsodium/releases' +
-        '/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz'
+            'https://github.com/jedisct1/libsodium/releases' +
+            '/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz'
     )
     libsodium_tar_gz_path = './src/rbcl/libsodium.tar.gz'
     libsodium_tar_gz_folder = './src/rbcl/libsodium_tar_gz'
@@ -85,6 +84,7 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
 
     return libsodium_folder
 
+
 def extract_current_build_path():
     """
     Extract path to current rbcl build directory
@@ -108,6 +108,7 @@ def extract_current_build_path():
 
     return f"build/{lib_dir}/rbcl/"
 
+
 def extract_current_lib_path():
     """
     Extract path to temp.<platform>-<arch>-<python_version> compiled libsodium library
@@ -125,6 +126,7 @@ def extract_current_lib_path():
         )
 
     return f"build/{lib_dir}/lib/"
+
 
 def render_sodium():
     """
@@ -152,12 +154,14 @@ def render_sodium():
     with open(f"{extract_current_build_path()}/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
+
 class Distribution(Distribution):
     def has_c_libraries(self):
         # Even though libsodium for Windows includes a precompiled libsodium.dll binary,
         # we still need to call render_sodium() for windows builds in the build_clib.run
         # function, which only gets triggered if this function returns True
         return True
+
 
 def extract_sodium_from_static_archive(lib_temp: str):
     """
@@ -176,6 +180,7 @@ def extract_sodium_from_static_archive(lib_temp: str):
             subprocess.check_call(['lipo', 'libsodium.a', '-thin', 'x86_64', '-output', 'libsodium.a'], cwd=lib_temp)
         except:
             pass
+
 
 class build_clib(_build_clib):
     def get_source_files(self):
@@ -208,8 +213,8 @@ class build_clib(_build_clib):
                 if os.access(p, os.X_OK):
                     found = True
                 for e in filter(
-                    None,
-                    os.environ.get('PATHEXT', '').split(os.pathsep)
+                        None,
+                        os.environ.get('PATHEXT', '').split(os.pathsep)
                 ):
                     if os.access(p + e, os.X_OK):
                         found = True
@@ -221,9 +226,9 @@ class build_clib(_build_clib):
             variable: value
             for (variable, value) in get_config_vars().items()
             if (
-                variable in [
-                    'LDFLAGS', 'CFLAGS', 'CC', 'CCSHARED', 'LDSHARED'
-                ] and variable not in os.environ
+                    variable in [
+                'LDFLAGS', 'CFLAGS', 'CC', 'CCSHARED', 'LDSHARED'
+            ] and variable not in os.environ
             )
         })
 
@@ -279,60 +284,3 @@ class build_clib(_build_clib):
 
         # Emit sodium binary to _sodium.py file as hex-encoded string
         render_sodium()
-
-with open('README.rst', 'r') as fh:
-    long_description = fh.read()
-
-name = 'rbcl'
-version = '0.4.6'
-
-setup(
-    name=name,
-    version=version,
-    packages=[name],
-    package_data={
-        "": ["*.tmpl"]
-    },
-    ext_package=name,
-    install_requires=[
-        'barriers~=1.0',
-        'pystache~=0.6'
-    ],
-    extras_require={
-        'build': [
-            'setuptools~=62.0',
-            'wheel~=0.37',
-            'pystache~=0.6'
-        ],
-        'docs': [
-            'sphinx~=4.2.0',
-            'sphinx-rtd-theme~=1.0.0'
-        ],
-        'test': [
-            'pytest~=7.0',
-            'pytest-cov~=3.0'
-        ],
-        'lint': [
-            'pylint~=2.14.0'
-        ],
-        'coveralls': [
-            'coveralls~=3.3.1'
-        ],
-        'publish': [
-            'twine~=4.0'
-        ]
-    },
-    license='MIT',
-    url='https://github.com/nthparty/rbcl',
-    author='Nth Party, Ltd.',
-    author_email='team@nthparty.com',
-    description='Python library that bundles libsodium and provides ' + \
-                'wrappers for its Ristretto group functions.',
-    long_description=long_description,
-    long_description_content_type='text/x-rst',
-    cmdclass={
-        'build_clib': build_clib,
-    },
-    distclass=Distribution,
-    zip_safe=False
-)

@@ -1,9 +1,5 @@
 """Allow users to use functions directly."""
-try:
-    # Import _sodium.py file which is emitted by build step
-    from rbcl import _sodium  # pylint: disable=import-self
-except ImportError:
-    pass
+from rbcl import _sodium
 
 from rbcl.rbcl import \
     crypto_scalarmult_ristretto255, \
