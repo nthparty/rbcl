@@ -80,49 +80,6 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
     return libsodium_folder
 
 
-def extract_current_build_path():
-    """
-    Extract path to current rbcl build directory
-    """
-
-    build_dirs = os.listdir("build")
-    lib_dir = None
-    for item in build_dirs:
-        if "lib." in item:
-            lib_dir = item
-
-    if lib_dir is None:  # If still None, then settle for just 'lib' with no '.'.
-        for item in build_dirs:
-            if "lib" in item:
-                lib_dir = item
-
-    if lib_dir is None:
-        raise NotADirectoryError(
-            "Could not locate lib.<platform>-<python_version> directory within build directory."
-        )
-
-    return f"build/{lib_dir}/rbcl/"
-
-
-def extract_current_lib_path():
-    """
-    Extract path to temp.<platform>-<arch>-<python_version> compiled libsodium library
-    """
-
-    build_dirs = os.listdir("build")
-    lib_dir = None
-    for item in build_dirs:
-        if "temp." in item:
-            lib_dir = item
-
-    if lib_dir is None:
-        raise NotADirectoryError(
-            "Could not locate lib.<platform>-<python_version> directory within build directory."
-        )
-
-    return f"build/{lib_dir}/lib/"
-
-
 def render_sodium():
     """
     Emit compiled sodium binary as hex string in _sodium.py file
@@ -136,17 +93,17 @@ def render_sodium():
     # Extract path to compiled libsodium binary
     path_to_sodium = \
         f"{os.environ.get('LIB')}/libsodium.dll" if sys.platform == "win32" \
-        else f"{extract_current_lib_path()}/libsodium.so"
+        else "build/temp/lib/libsodium.so"
 
     data = {
         "SODIUM_HEX": open(
             path_to_sodium, "rb"
         ).read().hex()
     }
-    template = open(f"{extract_current_build_path()}/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
+    template = open("build/lib/rbcl/_sodium.tmpl", encoding='utf-8').read()  # pylint: disable=consider-using-with
 
     # Emit rendered file to build directory
-    with open(f"{extract_current_build_path()}/_sodium.py", "w", encoding='utf-8') as sodium_out:
+    with open("build/lib/rbcl/_sodium.py", "w", encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
 
@@ -170,6 +127,8 @@ def extract_sodium_from_static_archive(lib_temp: str):
 
 
 class Install(install):
+
+    BUILD_TEMP = "build/temp"
 
     def get_source_files(self):
         return [
@@ -216,7 +175,7 @@ class Install(install):
         })
 
         # Ensure the temporary build directory exists.
-        build_temp = os.path.abspath(self.build_temp)
+        build_temp = os.path.abspath(Install.BUILD_TEMP)
         try:
             os.makedirs(build_temp)
         except OSError as e:
@@ -242,7 +201,7 @@ class Install(install):
                 '--disable-debug', '--disable-dependency-tracking', '--with-pic',
             ] +
             (['--disable-ssp'] if platform.system() == 'SunOS' else []) +
-            ['--prefix', os.path.abspath(self.build_clib)],
+            ['--prefix', os.path.abspath(Install.BUILD_TEMP)],
             cwd=build_temp
         )
         make_args = os.environ.get('LIBSODIUM_MAKE_ARGS', '').split()
@@ -251,7 +210,7 @@ class Install(install):
         subprocess.check_call(['make', 'install'] + make_args, cwd=build_temp)
 
         # Build dynamic (shared object) library file from the statically compiled archive binary file.
-        lib_temp = os.path.join(self.build_clib, 'lib')
+        lib_temp = os.path.join(Install.BUILD_TEMP, 'lib')
 
         # Different macOS GH runners contain either single or multi-target static archives
         if sys.platform == "darwin":
@@ -263,7 +222,8 @@ class Install(install):
         import glob
         object_file_relpaths = glob.glob(lib_temp+"/*.o")
         object_file_names = [o.split('/')[-1] for o in object_file_relpaths]
-        subprocess.check_call(['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'], cwd=lib_temp)  # Invoke gcc to (re-)link dynamically.
+        # Invoke gcc to (re-)link dynamically.
+        subprocess.check_call(['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'], cwd=lib_temp)
 
         # Emit sodium binary to _sodium.py file as hex-encoded string
         render_sodium()
