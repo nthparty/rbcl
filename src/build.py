@@ -11,12 +11,7 @@ import errno
 import urllib.request
 from distutils.sysconfig import get_config_vars
 import pystache
-from setuptools import Distribution
-
-try:
-    from setuptools.command.build_clib import build_clib as _build_clib
-except ImportError:
-    from distutils.command.build_clib import build_clib as _build_clib
+from setuptools.command.install import install
 
 
 def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
@@ -155,14 +150,6 @@ def render_sodium():
         sodium_out.write(pystache.render(template, data))
 
 
-class Distribution(Distribution):
-    def has_c_libraries(self):
-        # Even though libsodium for Windows includes a precompiled libsodium.dll binary,
-        # we still need to call render_sodium() for windows builds in the build_clib.run
-        # function, which only gets triggered if this function returns True
-        return True
-
-
 def extract_sodium_from_static_archive(lib_temp: str):
     """
     For certain versions of macOS, the libsodium.a contains multiple target architectures.
@@ -182,7 +169,8 @@ def extract_sodium_from_static_archive(lib_temp: str):
             pass
 
 
-class build_clib(_build_clib):
+class Install(install):
+
     def get_source_files(self):
         return [
             file
@@ -190,16 +178,11 @@ class build_clib(_build_clib):
             for file in glob.glob(os.path.relpath('src/rbcl/libsodium' + ('/*' * i)))
         ]
 
-    def build_libraries(self, libraries):
-        raise RuntimeError('`build_libraries` should not be invoked')
-
-    def check_library_list(self, libraries):
-        raise RuntimeError('`check_library_list` should not be invoked')
-
     def get_library_names(self):
         return ['sodium']
 
     def run(self):
+
         # On Windows, only a precompiled dynamic library file is used.
         if sys.platform == 'win32':
             render_sodium()
