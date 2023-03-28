@@ -159,7 +159,7 @@ class Install(install):
 
     def run(self):
 
-        # os.makedirs(self.install_lib, exist_ok=True)
+        install.run(self)
 
         # On Windows, only a precompiled dynamic library file is used.
         if sys.platform == 'win32':
@@ -245,4 +245,3 @@ class Install(install):
 
         # Emit sodium binary to _sodium.py file as hex-encoded string
         render_sodium()
-        super().run()
