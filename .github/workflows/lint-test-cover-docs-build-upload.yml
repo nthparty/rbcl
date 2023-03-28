@@ -15,8 +15,6 @@ jobs:
           - {version: "3.9", version-abi: "cp39", version-abi-suffix: "cp39"}
           - {version: "3.10", version-abi: "cp310", version-abi-suffix: "cp310"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for manylinux2014_x86_64"
-    env:
-      PY_LIMITED_API: --py-limited-api=${{ matrix.python.version-abi }}
     steps:
       - uses: actions/checkout@v2
       - name: Install development dependencies.
@@ -36,7 +34,7 @@ jobs:
       - name: Build wheel file.
         run: |
           mkdir tmpwheelhouse
-          LIBSODIUM_MAKE_ARGS="-j$(nproc)" .venv/bin/python setup.py bdist_wheel $PY_LIMITED_API
+          LIBSODIUM_MAKE_ARGS="-j$(nproc)" .venv/bin/python -m build --wheel
           mv dist/rbcl*.whl tmpwheelhouse
           mkdir wheelhouse
           mv tmpwheelhouse/rbcl*.whl wheelhouse/
@@ -59,7 +57,7 @@ jobs:
       - name: Test auto-generation of documentation.
         run: |
           .venv/bin/pip install -U .[docs]
-          cd docs && ../.venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py && cd ..
+          cd docs && ../.venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -77,8 +75,6 @@ jobs:
           - {version: '3.8', version-abi: 'cp38', version-url: '3.8.9'}
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
-    env:
-      PY_LIMITED_API: --py-limited-api=${{ matrix.python.version-abi }}
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -99,7 +95,7 @@ jobs:
           mkdir wheelhouse
           rm -f dist/*.*
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" CFLAGS="-mmacosx-version-min=10.9 -march=core2" \
-              venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+              venv/bin/python -m build --wheel && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
@@ -112,7 +108,7 @@ jobs:
       - name: Test auto-generation of documentation.
         run: |
           venv/bin/pip install -U .[docs]
-          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py && cd ..
+          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -129,8 +125,6 @@ jobs:
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
           - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
-    env:
-      PY_LIMITED_API: --py-limited-api=${{ matrix.python.version-abi }}
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -151,7 +145,7 @@ jobs:
           mkdir wheelhouse
           rm -f dist/*.*
           LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64 -arch x86_64" ARCHFLAGS="-arch arm64 -arch x86_64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
-              venv/bin/python setup.py bdist_wheel $PY_LIMITED_API && mv dist/rbcl*.whl wheelhouse
+              venv/bin/python -m build --wheel && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
         run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
@@ -164,7 +158,7 @@ jobs:
       - name: Test auto-generation of documentation.
         run: |
           venv/bin/pip install -U .[docs]
-          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py && cd ..
+          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -209,7 +203,7 @@ jobs:
         run: |
           mkdir wheelhouse
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
-          python setup.py bdist_wheel --py-limited-api=${{ matrix.python.version-abi }}
+          python -m build --wheel
           mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
         shell: cmd
@@ -225,7 +219,7 @@ jobs:
         run: |
           python -m pip install -U .[docs]
           cd docs
-          sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py
+          sphinx-apidoc -f -E --templatedir=_templates -o _source ..
           cd ..
       - name: Upload wheel file.
         run: |

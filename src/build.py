@@ -125,6 +125,23 @@ def extract_sodium_from_static_archive(lib_temp: str):
         except:
             pass
 
+try:
+    from wheel.bdist_wheel import bdist_wheel
+
+    # override bdist_wheel opts so output wheel file has platform-specific tags
+    class BdistWheel(bdist_wheel):
+        def finalize_options(self):
+            bdist_wheel.finalize_options(self)
+            self.root_is_pure = False
+
+        def get_tag(self):
+            python, abi, plat = bdist_wheel.get_tag(self)
+            python, abi = "py3", 'none'
+            return python, abi, plat
+
+except ImportError:
+    BdistWheel = None
+
 
 class Install(install):
 
@@ -221,7 +238,6 @@ class Install(install):
         # Explode the archive into many individual object files.
         subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)
 
-        import glob
         object_file_relpaths = glob.glob(lib_temp+"/*.o")
         object_file_names = [o.split('/')[-1] for o in object_file_relpaths]
         # Invoke gcc to (re-)link dynamically.
