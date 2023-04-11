@@ -2,7 +2,7 @@ name: lint-test-cover-docs-build-upload
 on:
   push
 env:
-  version: '0.4.6'
+  version: '1.0.0'
 jobs:
   manylinux:
     runs-on: ubuntu-latest
@@ -229,4 +229,3 @@ jobs:
         with:
           name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
           path: rbcl-wheelhouse\
-

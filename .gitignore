@@ -138,7 +138,9 @@ cover/
 # Intellij
 .idea
 
-# manually added
-sandbox/
+# Automatically generated source files
 src/rbcl/_sodium.py
+
+# Custom development folders
+sandbox/
 venv2/

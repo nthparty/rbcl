@@ -41,7 +41,7 @@ A few usage examples are presented below::
     >>> from rbcl import *
     >>> x = crypto_core_ristretto255_random()
     >>> assert crypto_core_ristretto255_is_valid_point(x)
-    >>> y = crypto_core_ristretto255_from_hash(b'\xF0'*64)
+    >>> y = crypto_core_ristretto255_from_hash(b'\xF0' * 64)
     >>> assert crypto_core_ristretto255_is_valid_point(y)
     >>> z1 = crypto_core_ristretto255_add(x, y)
     >>> z2 = crypto_core_ristretto255_add(y, x)
@@ -50,7 +50,7 @@ A few usage examples are presented below::
     >>> s2 = crypto_core_ristretto255_scalar_random()
     >>> w1 = crypto_scalarmult_ristretto255(s1, crypto_scalarmult_ristretto255(s2, x))
     >>> w2 = crypto_scalarmult_ristretto255(s2, crypto_scalarmult_ristretto255(s1, x))
-    >>> assert w1 == w2  # Assert that point multiplication (by a scalar) is repeated addition.
+    >>> assert w1 == w2  # Assert that multiplication of a point by a scalar is repeated addition.
 
 This library exports Python wrappers for `constructors <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#encoded-element-validation>`__, `point arithmetic functions <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-multiplication>`__, and `scalar arithmetic functions <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-arithmetic-over-l>`__.
 
@@ -125,7 +125,7 @@ This library can be published as a `package on PyPI <https://pypi.org/project/rb
 
     python -m pip install .[publish]
 
-Ensure that the correct version number appears in ``setup.py``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions. Create and push a tag for this version (replacing ``?.?.?`` with the version number)::
+Ensure that the correct version number appears in ``setup.cfg``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions. Create and push a tag for this version (replacing ``?.?.?`` with the version number)::
 
     git tag ?.?.?
     git push origin ?.?.?
