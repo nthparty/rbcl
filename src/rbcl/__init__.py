@@ -1,5 +1,5 @@
 """Allow users to use functions directly."""
-from rbcl import _sodium
+from rbcl import _sodium # pylint: disable=import-self
 
 from rbcl.rbcl import \
     crypto_scalarmult_ristretto255, \

@@ -42,7 +42,7 @@ randombytes_SEEDBYTES: int = \
 crypto_core_ristretto255_point_new = c_char * crypto_core_ristretto255_BYTES
 crypto_core_ristretto255_scalar_new = c_char * crypto_core_ristretto255_SCALARBYTES
 crypto_scalarmult_ristretto255_point_new = c_char * crypto_scalarmult_ristretto255_BYTES
-buf_new = lambda size : (c_char * size)()
+buf_new = lambda size : (c_char * size)() # pylint: disable=unnecessary-lambda-assignment
 
 def crypto_core_ristretto255_is_valid_point(p):  # (const unsigned char *p);
     """
