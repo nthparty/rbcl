@@ -32,7 +32,7 @@ This library is available as a `package on PyPI <https://pypi.org/project/rbcl>`
 
 The library can be imported in the usual ways:
 
-.. code-block:: bash
+.. code-block:: python
 
     import rbcl
     from rbcl import *
