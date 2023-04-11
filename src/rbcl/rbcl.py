@@ -4,7 +4,7 @@ and provides wrappers for its Ristretto group functions.
 
 This library exports wrappers for all libsodium methods related to the Ristretto
 group and random number generation, including all ``crypto_scalarmult_*`` methods
-and the `randombytes*` methods.
+and ``randombytes*`` methods.
 """
 from __future__ import annotations
 from ctypes import c_char
@@ -59,10 +59,11 @@ def crypto_core_ristretto255_is_valid_point(p):  # (const unsigned char *p);
     :return: point validity
     :rtype: bool
     """
-    if not isinstance(p, bytes) or len(p) != crypto_core_ristretto255_BYTES:
-        raise TypeError(
-            'Point must be a ' + str(crypto_core_ristretto255_BYTES) +
-            'long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_BYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'point must be a bytes object of length ' +
+            str(crypto_core_ristretto255_BYTES)
         ) # pragma: no cover
 
     rc = _sodium.crypto_core_ristretto255_is_valid_point(p)
@@ -91,12 +92,18 @@ def crypto_core_ristretto255_add(p, q):
              a :py:data:`.crypto_core_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if (
-        not isinstance(p, bytes) or len(p) != crypto_core_ristretto255_BYTES or \
-        not isinstance(q, bytes) or len(q) != crypto_core_ristretto255_BYTES
-    ):
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_BYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_BYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'first argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_BYTES)
+        ) # pragma: no cover
+
+    well_typed = isinstance(q, bytes)
+    if not well_typed or len(q) != crypto_core_ristretto255_BYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'second argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_BYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_point_new()
@@ -126,12 +133,18 @@ def crypto_core_ristretto255_sub(p, q):
              a :py:data:`.crypto_core_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if (
-        not isinstance(p, bytes) or len(p) != crypto_core_ristretto255_BYTES or \
-        not isinstance(q, bytes) or len(q) != crypto_core_ristretto255_BYTES
-    ):
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_BYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_BYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'first argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_BYTES)
+        ) # pragma: no cover
+
+    well_typed = isinstance(q, bytes)
+    if not well_typed or len(q) != crypto_core_ristretto255_BYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'second argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_BYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_point_new()
@@ -155,10 +168,11 @@ def crypto_core_ristretto255_from_hash(h):
               :py:data:`.crypto_core_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(h, bytes) or len(
-            h) != crypto_core_ristretto255_HASHBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_HASHBYTES} long bytes sequence'
+    well_typed = isinstance(h, bytes)
+    if not well_typed or len(h) != crypto_core_ristretto255_HASHBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'each integer must be a bytes object of length ' +
+            str(crypto_core_ristretto255_HASHBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_point_new()
@@ -230,10 +244,11 @@ def crypto_core_ristretto255_scalar_invert(p):
               :py:data:`.crypto_core_ristretto255_SCALARBYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(p, bytes) or len(
-            p) != crypto_core_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'each integer must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_scalar_new()
@@ -259,8 +274,8 @@ def crypto_core_ristretto255_scalar_negate(p):
     >>> try:
     ...     zero_p = crypto_scalarmult_ristretto255(zero, p)
     ... except RuntimeError as e:
-    ...     str(e) == '`n` cannot be larger than the size of ' + \
-                      'the group or p^n is the identity element'
+    ...     str(e) == 'input cannot be larger than the size of the group and ' + \
+                      'cannot yield the identity element when applied as an exponent'
     True
 
     :param s: a :py:data:`.crypto_core_ristretto255_SCALARBYTES`
@@ -270,10 +285,11 @@ def crypto_core_ristretto255_scalar_negate(p):
               :py:data:`.crypto_core_ristretto255_SCALARBYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(p, bytes) or len(
-            p) != crypto_core_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'each integer must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_scalar_new()
@@ -302,10 +318,11 @@ def crypto_core_ristretto255_scalar_complement(p):
               :py:data:`.crypto_core_ristretto255_SCALARBYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(p, bytes) or len(
-            p) != crypto_core_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'each integer must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_scalar_new()
@@ -336,11 +353,18 @@ def crypto_core_ristretto255_scalar_add(p, q):
               :py:data:`.crypto_core_ristretto255_SCALARBYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(
-            p, bytes) or len(p) != crypto_core_ristretto255_SCALARBYTES or not isinstance(
-            q, bytes) or len(q) != crypto_core_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'first argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
+        ) # pragma: no cover
+
+    well_typed = isinstance(q, bytes)
+    if not well_typed or len(q) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'second argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_scalar_new()
@@ -370,11 +394,18 @@ def crypto_core_ristretto255_scalar_sub(p, q):
               :py:data:`.crypto_core_ristretto255_SCALARBYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(
-            p, bytes) or len(p) != crypto_core_ristretto255_SCALARBYTES or not isinstance(
-            q, bytes) or len(q) != crypto_core_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not isinstance(p, bytes) or len(p) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'first argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
+        ) # pragma: no cover
+
+    well_typed = isinstance(q, bytes)
+    if not isinstance(q, bytes) or len(q) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'second argument must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_scalar_new()
@@ -405,11 +436,18 @@ def crypto_core_ristretto255_scalar_mul(p, q):
               :py:data:`.crypto_core_ristretto255_SCALARBYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(
-            p, bytes) or len(p) != crypto_core_ristretto255_SCALARBYTES or not isinstance(
-            q, bytes) or len(q) != crypto_core_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not isinstance(p, bytes) or len(p) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'each integer must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
+        ) # pragma: no cover
+
+    well_typed = isinstance(q, bytes)
+    if not isinstance(q, bytes) or len(q) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'each integer must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_scalar_new()
@@ -439,10 +477,11 @@ def crypto_core_ristretto255_scalar_reduce(p):
               :py:data:`.crypto_core_ristretto255_SCALARBYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(p, bytes) or len(
-            p) != crypto_core_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Each integer must be a {crypto_core_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_core_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'each integer must be a bytes object of length ' +
+            str(crypto_core_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     r = crypto_core_ristretto255_scalar_new()
@@ -466,16 +505,18 @@ def crypto_scalarmult_ristretto255_base(n):
              :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(n, bytes) or len(
-            n) != crypto_scalarmult_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Input must be a {crypto_scalarmult_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(n, bytes)
+    if not well_typed or len(n) != crypto_scalarmult_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'input must be a bytes object of length ' +
+            str(crypto_scalarmult_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     q = crypto_scalarmult_ristretto255_point_new()
     if _sodium.crypto_scalarmult_ristretto255_base(q, n) == -1:
         raise RuntimeError(
-            '`n` cannot be larger than the size of the group or g^n is the identity element'
+            'input cannot be larger than the size of the group and ' +
+            'cannot yield the identity element when applied as an exponent'
         ) # pragma: no cover
 
     return q.raw
@@ -501,10 +542,11 @@ def crypto_scalarmult_ristretto255_base_allow_scalar_zero(n):
              :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(n, bytes) or len(
-            n) != crypto_scalarmult_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Input must be a {crypto_scalarmult_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(n, bytes)
+    if not well_typed or len(n) != crypto_scalarmult_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'input must be a bytes object of length ' +
+            str(crypto_scalarmult_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
     q = crypto_scalarmult_ristretto255_point_new()
@@ -541,22 +583,25 @@ def crypto_scalarmult_ristretto255(n, p):
              :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(n, bytes) or len(
-            n) != crypto_scalarmult_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Input must be a {crypto_scalarmult_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(n, bytes)
+    if not well_typed or len(n) != crypto_scalarmult_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'input must be a bytes object of length ' +
+            str(crypto_scalarmult_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
-    if not isinstance(p, bytes) or len(
-            p) != crypto_scalarmult_ristretto255_BYTES:
-        raise TypeError(
-            f'Input must be a {crypto_scalarmult_ristretto255_BYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_scalarmult_ristretto255_BYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'input must be a bytes object of length ' +
+            str(crypto_scalarmult_ristretto255_BYTES)
         ) # pragma: no cover
 
     q = crypto_scalarmult_ristretto255_point_new()
     if _sodium.crypto_scalarmult_ristretto255(q, n, p) == -1:
         raise RuntimeError(
-            '`n` cannot be larger than the size of the group or p^n is the identity element'
+            'input cannot be larger than the size of the group and ' +
+            'cannot yield the identity element when applied as an exponent'
         )
     return q.raw
 
@@ -593,7 +638,7 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(
     >>> crypto_scalarmult_ristretto255_allow_scalar_zero(zero_scalar, invalid_point)
     Traceback (most recent call last):
       ...
-    TypeError: The second input must represent a valid Ristretto255 point
+    TypeError: second input must represent a valid point
 
     :param n: a :py:data:`.crypto_scalarmult_ristretto255_SCALARBYTES` long bytes
               sequence representing a scalar
@@ -605,19 +650,23 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(
              :py:data:`.crypto_scalarmult_ristretto255_BYTES` long bytes sequence
     :rtype: bytes
     """
-    if not isinstance(n, bytes) or len(n) != crypto_scalarmult_ristretto255_SCALARBYTES:
-        raise TypeError(
-            f'Input must be a {crypto_scalarmult_ristretto255_SCALARBYTES} long bytes sequence'
+    well_typed = isinstance(n, bytes)
+    if not well_typed or len(n) != crypto_scalarmult_ristretto255_SCALARBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'input must be a bytes object of length ' +
+            str(crypto_scalarmult_ristretto255_SCALARBYTES)
         ) # pragma: no cover
 
-    if not isinstance(p, bytes) or len(p) != crypto_scalarmult_ristretto255_BYTES:
-        raise TypeError(
-            f'Input must be a {crypto_scalarmult_ristretto255_BYTES} long bytes sequence'
+    well_typed = isinstance(p, bytes)
+    if not well_typed or len(p) != crypto_scalarmult_ristretto255_BYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'input must be a bytes object of length ' +
+            str(crypto_scalarmult_ristretto255_BYTES)
         ) # pragma: no cover
 
     safe # pylint: disable=pointless-statement # Marker for ``barriers`` decorator ``safe``.
     if not crypto_core_ristretto255_is_valid_point(p):
-        raise TypeError('The second input must represent a valid Ristretto255 point')
+        raise TypeError('second input must represent a valid point')
 
     q = crypto_scalarmult_ristretto255_point_new()
 
@@ -659,9 +708,7 @@ def randombytes_buf_deterministic(size, seed):
     :rtype: bytes
     """
     if len(seed) != randombytes_SEEDBYTES:
-        raise TypeError( # pragma: no cover
-            'Deterministic random bytes must be generated from 32 bytes'
-        )
+        raise ValueError('seed must be of length 32')
 
     buf = buf_new(size)
     _sodium.randombytes_buf_deterministic(buf, size, seed)
@@ -672,13 +719,11 @@ def randombytes_buf_deterministic(size, seed):
 
 def _sodium_init():
     if _sodium.sodium_init() == 1:
-        raise RuntimeError( # pragma: no cover
-            'libsodium is somehow already in use by this instance of rbcl'
-        )
+        raise RuntimeError('libsodium is already initialized') # pragma: no cover
+
     if not _sodium.sodium_init() == 1:
-        raise RuntimeError( # pragma: no cover
-            'libsodium error during initialization'
-        )
+        raise RuntimeError('libsodium error during initialization') # pragma: no cover
+
     _sodium.ready = True
 
 _sodium_init()
