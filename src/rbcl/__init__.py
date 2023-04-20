@@ -1,4 +1,4 @@
-"""Allow users to use functions directly."""
+"""Gives users direct access to functions."""
 from rbcl import _sodium # pylint: disable=import-self
 
 from rbcl.rbcl import \

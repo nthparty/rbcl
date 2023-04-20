@@ -44,7 +44,7 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           .venv/bin/pip install -U .[lint,test]
-          .venv/bin/python -m pylint rbcl # Check against linting rules.
+          .venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/build.py # Check against linting rules.
           .venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           .venv/bin/python -m pytest # Run tests.
       - name: Publish coverage results.
@@ -102,7 +102,7 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
-          venv/bin/python -m pylint rbcl # Check against linting rules.
+          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/build.py # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
@@ -152,7 +152,7 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
-          venv/bin/python -m pylint rbcl # Check against linting rules.
+          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/build.py # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
@@ -212,7 +212,7 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           python -m pip install -U pip .[lint,test]
-          python -m pylint rbcl # Check against linting rules.
+          python -m pylint src/rbcl/_sodium.tmpl src/build.py rbcl # Check against linting rules.
           python src/rbcl/rbcl.py -v # Run doctests.
           python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
