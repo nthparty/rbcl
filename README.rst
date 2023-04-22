@@ -133,7 +133,7 @@ Style conventions are enforced using `Pylint <https://pylint.readthedocs.io>`__:
 .. code-block:: bash
 
     python -m pip install .[lint]
-    python -m pylint src/rbcl src/rbcl/_sodium.tmpl src/build.py
+    python -m pylint src/rbcl src/rbcl/_sodium.tmpl src/build.py --disable=duplicate-code
 
 Contributions
 ^^^^^^^^^^^^^
