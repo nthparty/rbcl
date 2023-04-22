@@ -80,21 +80,24 @@ def render_sodium():
     """
     Emit compiled sodium binary as hexadecimal string in ``_sodium.py`` file.
     """
-    if os.environ.get('LIB', None) is None and sys.platform == "win32":
-        raise EnvironmentError(
-            'for Windows builds, environment variable $LIB must be set ' +
-            'to path to libsodium directory'
-        )
-
     # Extract path to compiled libsodium binary.
-    path_to_sodium = (
-        f"{os.environ.get('LIB')}/libsodium.dll"
-        if sys.platform == 'win32' else
-        'build/temp/lib/libsodium.so'
-    )
+    path_libsodium = 'build/temp/lib/libsodium.so' # Default for non-Windows builds.
+    if sys.platform == 'win32':
+        path_directory = (
+            os.environ.get('LIB', None)
+            if os.environ.get('LIB', None) is not None else
+            os.path.join(os.environ['WINDIR'], 'System32') # Windows default.
+        )
+        path_libsodium = os.path.join(path_directory, 'libsodium.dll')
+        if not os.path.exists(path_libsodium):
+            raise EnvironmentError(
+                'libsodium DLL not found at ' + path_libsodium + ', ' +
+                'set environment variable $LIB to path of directory ' +
+                'containing libsodium DLL'
+            )
 
     # pylint: disable=consider-using-with
-    data = {'SODIUM_HEX': open(path_to_sodium, 'rb').read().hex()}
+    data = {'SODIUM_HEX': open(path_libsodium, 'rb').read().hex()}
     template = open('build/lib/rbcl/_sodium.tmpl', encoding='utf-8').read()
 
     # Emit rendered file to build directory.
@@ -183,7 +186,7 @@ class Install(install):
             variable: value
             for (variable, value) in get_config_vars().items()
             if (
-                variable in ['LDFLAGS', 'CFLAGS', 'CC', 'CCSHARED', 'LDSHARED'] and \
+                variable in ['LDFLAGS', 'CFLAGS', 'CC', 'CCSHARED', 'LDSHARED'] and
                 variable not in os.environ
             )
         })
@@ -223,20 +226,25 @@ class Install(install):
         subprocess.check_call(['make', 'check'] + make_args, cwd=build_temp)
         subprocess.check_call(['make', 'install'] + make_args, cwd=build_temp)
 
-        # Build dynamic (shared object) library file from the statically compiled archive binary file.
+        # Build dynamic (shared object) library file from the statically compiled
+        # archive binary file.
         lib_temp = os.path.join(Install.BUILD_TEMP, 'lib')
 
-        # Different macOS GitHub runners contain either single or multi-target static archives.
-        if sys.platform == "darwin":
+        # Different macOS GitHub runners contain either single or multi-target static
+        # archives.
+        if sys.platform == 'darwin':
             extract_sodium_from_static_archive(lib_temp)
 
         # Explode the archive into many individual object files.
         subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)
 
-        object_file_relpaths = glob.glob(lib_temp+"/*.o")
+        object_file_relpaths = glob.glob(lib_temp + '/*.o')
         object_file_names = [o.split('/')[-1] for o in object_file_relpaths]
         # Invoke gcc to (re-)link dynamically.
-        subprocess.check_call(['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'], cwd=lib_temp)
+        subprocess.check_call(
+            ['gcc', '-shared'] + object_file_names + ['-o', 'libsodium.so'],
+            cwd=lib_temp
+        )
 
         # Emit sodium binary to ``_sodium.py`` file as hex-encoded string.
         render_sodium()
