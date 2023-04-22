@@ -14,6 +14,7 @@ jobs:
           - {version: "3.8", version-abi: "cp38", version-abi-suffix: "cp38"}
           - {version: "3.9", version-abi: "cp39", version-abi-suffix: "cp39"}
           - {version: "3.10", version-abi: "cp310", version-abi-suffix: "cp310"}
+          - {version: "3.11", version-abi: "cp311", version-abi-suffix: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for manylinux2014_x86_64"
     steps:
       - uses: actions/checkout@v2
