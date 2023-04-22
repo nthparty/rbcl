@@ -125,6 +125,7 @@ jobs:
         python:
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
           - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
+          - {version: '3.11', version-abi: 'cp311', version-url: '3.11.3'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
     steps:
       - uses: actions/checkout@v2
@@ -180,6 +181,7 @@ jobs:
           - {version: "3.8", version-abi: "cp38"}
           - {version: "3.9", version-abi: "cp39"}
           - {version: "3.10", version-abi: "cp310"}
+          - {version: "3.11", version-abi: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
     env:
       INCLUDE: C:/libsodium/include
