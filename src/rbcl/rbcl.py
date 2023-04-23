@@ -24,26 +24,26 @@ try:
 except: # pylint: disable=bare-except # pragma: no cover
     from rbcl._sodium import _sodium # pylint: disable=cyclic-import
 
-doctests_not_ready = not hasattr(_sodium, 'ready') or not _sodium.ready is True or not type(_sodium.ready) is type(True) # pylint: disable=unidiomatic-typecheck
-crypto_scalarmult_ristretto255_BYTES: int = \
-    (32 if doctests_not_ready else None) or _sodium.crypto_scalarmult_ristretto255_bytes()
-crypto_scalarmult_ristretto255_SCALARBYTES: int = \
-    (32 if doctests_not_ready else None) or _sodium.crypto_scalarmult_ristretto255_scalarbytes()
-crypto_core_ristretto255_BYTES: int = \
-    (32 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_bytes()
-crypto_core_ristretto255_HASHBYTES: int = \
-    (64 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_hashbytes()
-crypto_core_ristretto255_NONREDUCEDSCALARBYTES: int = \
-    (64 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_nonreducedscalarbytes()
-crypto_core_ristretto255_SCALARBYTES: int = \
-    (32 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_scalarbytes()
-randombytes_SEEDBYTES: int = \
-    (32 if doctests_not_ready else None) or _sodium.randombytes_seedbytes()
-
-crypto_core_ristretto255_point_new = c_char * crypto_core_ristretto255_BYTES
-crypto_core_ristretto255_scalar_new = c_char * crypto_core_ristretto255_SCALARBYTES
-crypto_scalarmult_ristretto255_point_new = c_char * crypto_scalarmult_ristretto255_BYTES
-buf_new = lambda size : (c_char * size)() # pylint: disable=unnecessary-lambda-assignment
+# Globals (defined within ``_sodium_init`` after libsodium is ready).
+crypto_scalarmult_ristretto255_BYTES: int = None
+crypto_scalarmult_ristretto255_SCALARBYTES: int = None
+crypto_core_ristretto255_BYTES: int = None
+crypto_core_ristretto255_HASHBYTES: int = None
+crypto_core_ristretto255_NONREDUCEDSCALARBYTES: int = None
+crypto_core_ristretto255_SCALARBYTES: int = None
+randombytes_SEEDBYTES: int = None
+crypto_core_ristretto255_point_new = (
+    lambda: None # pylint: disable=unnecessary-lambda-assignment
+)
+crypto_core_ristretto255_scalar_new = (
+    lambda: None # pylint: disable=unnecessary-lambda-assignment
+)
+crypto_scalarmult_ristretto255_point_new = (
+    lambda: None # pylint: disable=unnecessary-lambda-assignment
+)
+buf_new = (
+    lambda size: (c_char * size)() # pylint: disable=unnecessary-lambda-assignment
+)
 
 def crypto_core_ristretto255_is_valid_point(p):  # (const unsigned char *p);
     """
@@ -715,19 +715,44 @@ def randombytes_buf_deterministic(size, seed):
     _sodium.randombytes_buf_deterministic(buf, size, seed)
     return buf.raw
 
-# Initializes sodium, picking the best implementations available for this
-# machine.
 
 def _sodium_init():
+    """
+    Checks that libsodium is not already initialized, initializes it,
+    and defines globals whose definitions depend on functions exported
+    by libsodium.
+    """
     if _sodium.sodium_init() == 1:
         raise RuntimeError('libsodium is already initialized') # pragma: no cover
 
-    if not _sodium.sodium_init() == 1 and not doctests_not_ready:
+    if not _sodium.sodium_init() == 1:
         raise RuntimeError('libsodium error during initialization') # pragma: no cover
 
     _sodium.ready = True
 
-_sodium_init()
+    # Define values of global variables.
+    context = globals()
+    context['crypto_scalarmult_ristretto255_BYTES'] = \
+        _sodium.crypto_scalarmult_ristretto255_bytes()
+    context['crypto_scalarmult_ristretto255_SCALARBYTES'] = \
+        _sodium.crypto_scalarmult_ristretto255_scalarbytes()
+    context['crypto_core_ristretto255_BYTES'] = \
+        _sodium.crypto_core_ristretto255_bytes()
+    context['crypto_core_ristretto255_HASHBYTES'] = \
+        _sodium.crypto_core_ristretto255_hashbytes()
+    context['crypto_core_ristretto255_NONREDUCEDSCALARBYTES'] = \
+        _sodium.crypto_core_ristretto255_nonreducedscalarbytes()
+    context['crypto_core_ristretto255_SCALARBYTES'] = \
+        _sodium.crypto_core_ristretto255_scalarbytes()
+    context['randombytes_SEEDBYTES'] = \
+        _sodium.randombytes_seedbytes()
+
+    context['crypto_core_ristretto255_point_new'] = \
+        c_char * crypto_core_ristretto255_BYTES
+    context['crypto_core_ristretto255_scalar_new'] = \
+        c_char * crypto_core_ristretto255_SCALARBYTES
+    context['crypto_scalarmult_ristretto255_point_new'] = \
+        c_char * crypto_scalarmult_ristretto255_BYTES
 
 if __name__ == '__main__':
     doctest.testmod() # pragma: no cover
