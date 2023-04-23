@@ -1,5 +1,5 @@
 """Gives users direct access to functions."""
-from rbcl.rbcl import _sodium, _sodium_init # pylint: disable=import-self
+from rbcl.rbcl import _sodium # pylint: disable=import-self
 
 from rbcl.rbcl import \
     crypto_scalarmult_ristretto255, \
@@ -27,6 +27,3 @@ from rbcl.rbcl import \
     crypto_core_ristretto255_sub, \
     randombytes, \
     randombytes_buf_deterministic
-
-# Check that libsodium is not already initialized and initialize it.
-_sodium_init() # pylint: disable=protected-access

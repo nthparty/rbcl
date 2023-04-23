@@ -754,5 +754,8 @@ def _sodium_init():
     context['crypto_scalarmult_ristretto255_point_new'] = \
         c_char * crypto_scalarmult_ristretto255_BYTES
 
+# Check that libsodium is not already initialized and initialize it.
+_sodium_init()
+
 if __name__ == '__main__':
     doctest.testmod() # pragma: no cover
