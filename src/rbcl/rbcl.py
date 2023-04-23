@@ -9,6 +9,7 @@ and ``randombytes*`` methods.
 from __future__ import annotations
 from ctypes import c_char
 import doctest
+import os
 import pathlib
 from barriers import barriers
 
@@ -754,8 +755,10 @@ def _sodium_init():
     context['crypto_scalarmult_ristretto255_point_new'] = \
         c_char * crypto_scalarmult_ristretto255_BYTES
 
-# Check that libsodium is not already initialized and initialize it.
-_sodium_init()
+# Check that libsodium is not already initialized and initialize it
+# (unless documentation is being automatically generated).
+if not os.environ.get('RBCL_SPHINX_AUTODOC_BUILD', None) == '1':
+    _sodium_init()
 
 if __name__ == '__main__':
     doctest.testmod() # pragma: no cover
