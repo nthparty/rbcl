@@ -24,7 +24,7 @@ try:
 except: # pylint: disable=bare-except # pragma: no cover
     from rbcl._sodium import _sodium # pylint: disable=cyclic-import
 
-doctests_not_ready = not ((_sodium.ready == True) and (type(_sodium.ready) == type(True)))
+doctests_not_ready = not ((_sodium.ready is True) and (type(_sodium.ready) is type(True))) # pylint: disable=unidiomatic-typecheck
 crypto_scalarmult_ristretto255_BYTES: int = \
     (32 if doctests_not_ready else None) or _sodium.crypto_scalarmult_ristretto255_bytes()
 crypto_scalarmult_ristretto255_SCALARBYTES: int = \
