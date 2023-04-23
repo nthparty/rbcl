@@ -24,20 +24,21 @@ try:
 except: # pylint: disable=bare-except # pragma: no cover
     from rbcl._sodium import _sodium # pylint: disable=cyclic-import
 
+doctests_not_ready = not hasattr(_sodium, 'ready') or not _sodium.ready is True or not type(_sodium.ready) is type(True) # pylint: disable=unidiomatic-typecheck
 crypto_scalarmult_ristretto255_BYTES: int = \
-    _sodium.crypto_scalarmult_ristretto255_bytes()
+    (32 if doctests_not_ready else None) or _sodium.crypto_scalarmult_ristretto255_bytes()
 crypto_scalarmult_ristretto255_SCALARBYTES: int = \
-    _sodium.crypto_scalarmult_ristretto255_scalarbytes()
+    (32 if doctests_not_ready else None) or _sodium.crypto_scalarmult_ristretto255_scalarbytes()
 crypto_core_ristretto255_BYTES: int = \
-    _sodium.crypto_core_ristretto255_bytes()
+    (32 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_bytes()
 crypto_core_ristretto255_HASHBYTES: int = \
-    _sodium.crypto_core_ristretto255_hashbytes()
+    (64 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_hashbytes()
 crypto_core_ristretto255_NONREDUCEDSCALARBYTES: int = \
-    _sodium.crypto_core_ristretto255_nonreducedscalarbytes()
+    (64 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_nonreducedscalarbytes()
 crypto_core_ristretto255_SCALARBYTES: int = \
-    _sodium.crypto_core_ristretto255_scalarbytes()
+    (32 if doctests_not_ready else None) or _sodium.crypto_core_ristretto255_scalarbytes()
 randombytes_SEEDBYTES: int = \
-    _sodium.randombytes_seedbytes()
+    (32 if doctests_not_ready else None) or _sodium.randombytes_seedbytes()
 
 crypto_core_ristretto255_point_new = c_char * crypto_core_ristretto255_BYTES
 crypto_core_ristretto255_scalar_new = c_char * crypto_core_ristretto255_SCALARBYTES
@@ -721,7 +722,7 @@ def _sodium_init():
     if _sodium.sodium_init() == 1:
         raise RuntimeError('libsodium is already initialized') # pragma: no cover
 
-    if not _sodium.sodium_init() == 1:
+    if not _sodium.sodium_init() == 1 and not doctests_not_ready:
         raise RuntimeError('libsodium error during initialization') # pragma: no cover
 
     _sodium.ready = True
