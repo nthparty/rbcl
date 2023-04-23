@@ -29,4 +29,4 @@ from rbcl.rbcl import \
     randombytes_buf_deterministic
 
 # Check that libsodium is not already initialized and initialize it.
-_sodium._sodium_init() 
+_sodium._sodium_init() # pylint: disable=protected-access
