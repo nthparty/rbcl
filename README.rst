@@ -51,18 +51,18 @@ A few usage examples are presented below:
     >>> assert crypto_core_ristretto255_is_valid_point(y)
     >>> z1 = crypto_core_ristretto255_add(x, y)
     >>> z2 = crypto_core_ristretto255_add(y, x)
-    >>> assert z1 == z2  # Assert that point addition commutes.
+    >>> assert z1 == z2 # Point addition commutes.
     >>> s1 = crypto_core_ristretto255_scalar_random()
     >>> s2 = crypto_core_ristretto255_scalar_random()
     >>> w1 = crypto_scalarmult_ristretto255(s1, crypto_scalarmult_ristretto255(s2, x))
     >>> w2 = crypto_scalarmult_ristretto255(s2, crypto_scalarmult_ristretto255(s1, x))
-    >>> assert w1 == w2  # Assert that multiplication of a point by a scalar is repeated addition.
+    >>> assert w1 == w2 # Multiplication of a point by a scalar is repeated addition.
 
 This library exports Python wrappers for `constructors <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#encoded-element-validation>`__, `point arithmetic functions <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-multiplication>`__, and `scalar arithmetic functions <https://libsodium.gitbook.io/doc/advanced/point-arithmetic/ristretto#scalar-arithmetic-over-l>`__.
 
 Development, Build, and Manual Installation Instructions
 --------------------------------------------------------
-All development and installation dependencies are managed using `setuptools <https://pypi.org/project/setuptools>`__ and are fully specified in ``setup.py``. The ``extras_require`` parameter is used to `specify optional requirements <https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies>`__ for various development tasks. This makes it possible to specify additional options (such as ``docs``, ``lint``, and so on) when performing installation using `pip <https://pypi.org/project/pip>`__:
+All development and installation dependencies are managed using `setuptools <https://pypi.org/project/setuptools>`__ and are fully specified in ``setup.cfg``. The ``extras_require`` option is used to `specify optional requirements <https://setuptools.pypa.io/en/latest/userguide/dependency_management.html#optional-dependencies>`__ for various development tasks. This makes it possible to specify additional options (such as ``docs``, ``lint``, and so on) when performing installation using `pip <https://pypi.org/project/pip>`__ (assuming that the library has already been built successfully):
 
 .. code-block:: bash
 
@@ -75,9 +75,9 @@ The library can be built manually from source **within Linux and macOS** using t
 .. code-block:: bash
 
     python -m pip install .[build]
-    python setup.py bdist_wheel
+    python -m build --sdist --wheel .
 
-Developing the library further in a local environment and/or building the library from source requires `libsodium <https://doc.libsodium.org>`__. The step ``python setup.py bdist_wheel`` in the above attempts to automatically locate a copy of the libsodium source archive ``src/rbcl/libsodium.tar.gz``. If the archive corresponding to the operating system is not found, the build process attempts to download it. To support building offline, it is necessary to first download the appropriate libsodium archive to its designated location:
+Developing the library further in a local environment and/or building the library from source requires `libsodium <https://doc.libsodium.org>`__. The step ``python -m build --sdist --wheel .`` in the above attempts to automatically locate a copy of the libsodium source archive ``src/rbcl/libsodium.tar.gz``. If the archive corresponding to the operating system is not found, the build process attempts to download it. To support building offline, it is necessary to first download the appropriate libsodium archive to its designated location:
 
 .. code-block:: bash
 
@@ -91,7 +91,7 @@ Before `documentation can be generated <#documentation>`_ or `tests can be execu
 
 .. code-block:: bash
 
-    cp build/lib*/rbcl/_sodium*.* src/rbcl
+    cp build/lib*/rbcl/_sodium.py src/rbcl
 
 Manual Installation
 ^^^^^^^^^^^^^^^^^^^
@@ -109,7 +109,7 @@ Once the libsodium shared library file is compiled and moved into its designated
 
     python -m pip install .[docs]
     cd docs
-    sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../setup.py ../src/rbcl/sodium_ffi.py && make html
+    sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/build.py && make html
 
 Testing and Conventions
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -163,7 +163,7 @@ Remove any old build/distribution files. Then, package the source into a distrib
 .. code-block:: bash
 
     rm -rf build dist src/*.egg-info
-    python setup.py sdist
+    python -m build --sdist --wheel .
 
 Next, navigate to the appropriate GitHub Actions run of the workflow defined in ``lint-test-cover-docs-build-upload.yml``. Click on the workflow and scroll down to the **Artifacts** panel. Download the archive files to the ``dist`` directory. Unzip all the archive files so that only the ``*.whl`` files remain:
 
