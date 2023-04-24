@@ -16,6 +16,8 @@ jobs:
           - {version: "3.10", version-abi: "cp310", version-abi-suffix: "cp310"}
           - {version: "3.11", version-abi: "cp311", version-abi-suffix: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for manylinux2014_x86_64"
+    env:
+      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
     steps:
       - uses: actions/checkout@v2
       - name: Install development dependencies.
@@ -65,10 +67,10 @@ jobs:
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
-          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
+          name: "${{ env.WHEELNAME }}"
           path: rbcl-wheelhouse/
   macos:
     runs-on: macos-latest
@@ -79,6 +81,8 @@ jobs:
           - {version: '3.8', version-abi: 'cp38', version-url: '3.8.9'}
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
+    env:
+      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -119,10 +123,10 @@ jobs:
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
-          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
+          name: "${{ env.WHEELNAME }}"
           path: rbcl-wheelhouse/
   macos-arm:
     runs-on: macos-11
@@ -133,6 +137,8 @@ jobs:
           - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
           - {version: '3.11', version-abi: 'cp311', version-url: '3.11.3'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
+    env:
+      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -173,10 +179,10 @@ jobs:
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
-          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/"${{ env.WHEELNAME }}".whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
+          name: "${{ env.WHEELNAME }}"
           path: rbcl-wheelhouse/
   windows:
     runs-on: windows-latest
@@ -193,6 +199,7 @@ jobs:
           - {version: "3.11", version-abi: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
     env:
+      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
       INCLUDE: C:/libsodium/include
       LIB: C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/
     steps:
@@ -237,8 +244,8 @@ jobs:
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
-          move wheelhouse\rbcl*.whl rbcl-wheelhouse\
+          move wheelhouse\rbcl*.whl rbcl-wheelhouse\"${{ env.WHEELNAME }}".whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
+          name: "${{ env.WHEELNAME }}"
           path: rbcl-wheelhouse\
