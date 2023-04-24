@@ -9,6 +9,7 @@ jobs:
     container: quay.io/pypa/manylinux2014_x86_64
     strategy:
       matrix:
+        version: ${{ env.version }}
         python:
           - {version: "3.7", version-abi: "cp37", version-abi-suffix: "cp37m"}
           - {version: "3.8", version-abi: "cp38", version-abi-suffix: "cp38"}
@@ -17,7 +18,7 @@ jobs:
           - {version: "3.11", version-abi: "cp311", version-abi-suffix: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for manylinux2014_x86_64"
     env:
-      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
+      WHEELNAME: "rbcl-${{ matrix.version }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
     steps:
       - uses: actions/checkout@v2
       - name: Install development dependencies.
@@ -76,13 +77,14 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
+        version: ${{ env.version }}
         python:
           - {version: '3.7', version-abi: 'cp37', version-url: '3.7.9'}
           - {version: '3.8', version-abi: 'cp38', version-url: '3.8.9'}
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
     env:
-      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
+      WHEELNAME: "rbcl-${{ matrix.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -132,13 +134,14 @@ jobs:
     runs-on: macos-11
     strategy:
       matrix:
+        version: ${{ env.version }}
         python:
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
           - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
           - {version: '3.11', version-abi: 'cp311', version-url: '3.11.3'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
     env:
-      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
+      WHEELNAME: "rbcl-${{ matrix.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -188,6 +191,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
+        version: ${{ env.version }}
         windows:
           - {version: 'win32', arch: 'x86', arch-sodium: 'Win32', arch-vs: 'x86'}
           - {version: 'win_amd64', arch: 'x64', arch-sodium: 'x64', arch-vs: 'amd64'}
@@ -199,7 +203,7 @@ jobs:
           - {version: "3.11", version-abi: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
     env:
-      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
+      WHEELNAME: "rbcl-${{ matrix.version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
       INCLUDE: C:/libsodium/include
       LIB: C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/
     steps:
