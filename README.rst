@@ -151,7 +151,7 @@ This library can be published as a `package on PyPI <https://pypi.org/project/rb
 
     python -m pip install .[publish]
 
-Ensure that the correct version number appears in ``setup.cfg`` and ``.github/workflows/lint-test-cover-docs-build-upload.yml``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions. Create and push a tag for this version (replacing ``?.?.?`` with the version number):
+Ensure that the correct version number appears in ``setup.cfg``, and that any links in this README document to the Read the Docs documentation of this package (or its dependencies) have appropriate version numbers. Also ensure that the Read the Docs project for this library has an `automation rule <https://docs.readthedocs.io/en/stable/automation-rules.html>`__ that activates and sets as the default all tagged versions. Create and push a tag for this version (replacing ``?.?.?`` with the version number):
 
 .. code-block:: bash
 
