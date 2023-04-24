@@ -112,7 +112,7 @@ def randombytes(length: int) -> bytes:
     >>> randombytes(-1)
     Traceback (most recent call last):
       ...
-    TypeError: length must be a non-negative integer
+    ValueError: length must be a non-negative integer
     """
     if not isinstance(length, int):
         raise TypeError('length must be an integer')
@@ -153,7 +153,7 @@ def randombytes_buf_deterministic(length: int, seed: bytes) -> bytes:
     >>> randombytes_buf_deterministic(-1, b'\x70'*32)
     Traceback (most recent call last):
       ...
-    TypeError: length must be a non-negative integer
+    ValueError: length must be a non-negative integer
     """
     if not isinstance(length, int):
         raise TypeError('length must be an integer')
