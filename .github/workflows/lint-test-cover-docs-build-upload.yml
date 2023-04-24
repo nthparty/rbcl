@@ -58,7 +58,7 @@ jobs:
       - name: Test auto-generation of documentation.
         run: |
           .venv/bin/pip install -U .[docs]
-          cd docs && ../.venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && cd ..
+          cd docs && ../.venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && make html && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -109,7 +109,7 @@ jobs:
       - name: Test auto-generation of documentation.
         run: |
           venv/bin/pip install -U .[docs]
-          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && cd ..
+          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && make html && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -160,7 +160,7 @@ jobs:
       - name: Test auto-generation of documentation.
         run: |
           venv/bin/pip install -U .[docs]
-          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && cd ..
+          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && make html && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -223,6 +223,7 @@ jobs:
           python -m pip install -U .[docs]
           cd docs
           sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py
+          make html
           cd ..
       - name: Upload wheel file.
         run: |
