@@ -17,7 +17,7 @@ jobs:
           - {version: "3.11", version-abi: "cp311", version-abi-suffix: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for manylinux2014_x86_64"
     env:
-      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
+      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
     steps:
       - uses: actions/checkout@v2
       - name: Install development dependencies.
@@ -82,7 +82,7 @@ jobs:
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
     env:
-      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
+      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -138,7 +138,7 @@ jobs:
           - {version: '3.11', version-abi: 'cp311', version-url: '3.11.3'}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
     env:
-      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
+      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
     steps:
       - uses: actions/checkout@v2
       - name: Download libsodium source tree archive.
@@ -199,7 +199,7 @@ jobs:
           - {version: "3.11", version-abi: "cp311"}
     name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
     env:
-      WHEELNAME: "rbcl-${{ env.version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
+      WHEELNAME: "rbcl-${{ version }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
       INCLUDE: C:/libsodium/include
       LIB: C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/
     steps:
