@@ -45,7 +45,7 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           .venv/bin/pip install -U .[lint,test]
-          .venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/build.py --disable=duplicate-code # Check against linting rules.
+          .venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
           .venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           .venv/bin/python -m pytest # Run tests.
       - name: Publish coverage results.
@@ -58,7 +58,7 @@ jobs:
       - name: Test auto-generation of documentation.
         run: |
           .venv/bin/pip install -U .[docs]
-          cd docs && ../.venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. && cd ..
+          cd docs && ../.venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -103,13 +103,13 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
-          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/build.py --disable=duplicate-code # Check against linting rules.
+          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
         run: |
           venv/bin/pip install -U .[docs]
-          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. && cd ..
+          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -154,13 +154,13 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
-          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/build.py --disable=duplicate-code # Check against linting rules.
+          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
         run: |
           venv/bin/pip install -U .[docs]
-          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. && cd ..
+          cd docs && ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && cd ..
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
@@ -215,14 +215,14 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           python -m pip install -U pip .[lint,test]
-          python -m pylint rbcl src/rbcl/_sodium.tmpl src/build.py --disable=duplicate-code # Check against linting rules.
+          python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
           python src/rbcl/rbcl.py -v # Run doctests.
           python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
         run: |
           python -m pip install -U .[docs]
           cd docs
-          sphinx-apidoc -f -E --templatedir=_templates -o _source ..
+          sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py
           cd ..
       - name: Upload wheel file.
         run: |

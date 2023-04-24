@@ -1,5 +1,6 @@
 """
-Build script invoked by setuptools.
+Script for building a bundled instance of libsodium  (for invocation by
+setuptools via ``setup.cfg``).
 """
 import sys
 import platform
@@ -76,9 +77,9 @@ def prepare_libsodium_source_tree(libsodium_folder='src/rbcl/libsodium'):
 
     return libsodium_folder
 
-def render_sodium():
+def emit_libsodium():
     """
-    Emit compiled sodium binary as hexadecimal string in ``_sodium.py`` file.
+    Emit compiled libsodium binary as hexadecimal string in ``_sodium.py`` file.
     """
     # Extract path to compiled libsodium binary.
     path_libsodium = 'build/temp/lib/libsodium.so' # Default for non-Windows builds.
@@ -104,7 +105,7 @@ def render_sodium():
     with open('build/lib/rbcl/_sodium.py', 'w', encoding='utf-8') as sodium_out:
         sodium_out.write(pystache.render(template, data))
 
-def extract_sodium_from_static_archive(lib_temp: str):
+def extract_libsodium_from_static_archive(lib_temp: str):
     """
     For certain versions of macOS, the ``libsodium.a`` file contains multiple
     target architectures. Calls to ``subprocess`` are wrapped in a ``try``
@@ -165,7 +166,7 @@ class Install(install):
 
         # On Windows, only a precompiled dynamic library file is used.
         if sys.platform == 'win32':
-            render_sodium()
+            emit_libsodium()
             return
 
         # Confirm that make utility can be found.
@@ -233,7 +234,7 @@ class Install(install):
         # Different macOS GitHub runners contain either single or multi-target static
         # archives.
         if sys.platform == 'darwin':
-            extract_sodium_from_static_archive(lib_temp)
+            extract_libsodium_from_static_archive(lib_temp)
 
         # Explode the archive into many individual object files.
         subprocess.check_call(['ar', '-x', 'libsodium.a'], cwd=lib_temp)
@@ -246,5 +247,5 @@ class Install(install):
             cwd=lib_temp
         )
 
-        # Emit sodium binary to ``_sodium.py`` file as hex-encoded string.
-        render_sodium()
+        # Emit libsodium binary to ``_sodium.py`` file as a hex-encoded string.
+        emit_libsodium()

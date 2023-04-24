@@ -109,7 +109,7 @@ Once the libsodium shared library file is compiled and moved into its designated
 
     python -m pip install .[docs]
     cd docs
-    sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/build.py && make html
+    sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py && make html
 
 Testing and Conventions
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -133,7 +133,7 @@ Style conventions are enforced using `Pylint <https://pylint.readthedocs.io>`__:
 .. code-block:: bash
 
     python -m pip install .[lint]
-    python -m pylint src/rbcl src/rbcl/_sodium.tmpl src/build.py --disable=duplicate-code
+    python -m pylint src/rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code
 
 Contributions
 ^^^^^^^^^^^^^
