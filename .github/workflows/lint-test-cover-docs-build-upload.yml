@@ -17,7 +17,7 @@ jobs:
     env:
       WHEELNAME: "rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install development dependencies.
         run: |
           yum -y install wget libffi-devel
@@ -82,7 +82,7 @@ jobs:
     env:
       WHEELNAME: "rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download libsodium source tree archive.
         run: |
           wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
@@ -138,7 +138,7 @@ jobs:
     env:
       WHEELNAME: "rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download libsodium source tree archive.
         run: |
           wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
@@ -201,14 +201,14 @@ jobs:
       INCLUDE: C:/libsodium/include
       LIB: C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Download and extract libsodium dynamic library file.
         run: |
           wget -O c:\libsodium-1.0.18-msvc.zip https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18-msvc.zip
           Expand-Archive c:\libsodium-1.0.18-msvc.zip -DestinationPath c:\
         shell: powershell
       - name: Install Python.
-        uses: actions/setup-python@v2.2.2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python.version }}
           architecture: ${{ matrix.windows.arch }}
