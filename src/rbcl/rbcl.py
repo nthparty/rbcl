@@ -2,9 +2,10 @@
 Python library that bundles `libsodium <https://github.com/jedisct1/libsodium>`__
 and provides wrappers for its Ristretto group functions.
 
-This library exports wrappers for all libsodium methods related to the Ristretto
-group and random number generation, including all ``crypto_scalarmult_*`` methods
-and ``randombytes*`` methods.
+This library exports wrappers for all libsodium functions related to the Ristretto
+group and random element generation, including all functions with names of the form
+``crypto_scalarmult_*`` and relevant functions with names of the form
+``randombytes*``.
 """
 from __future__ import annotations
 from typing import Callable
@@ -88,29 +89,48 @@ _buffer_create: Callable[[int], bytes] = (
     lambda size: (ctypes.c_char * size)() # pylint: disable=unnecessary-lambda-assignment
 )
 
-def randombytes(size: int) -> bytes:
+def randombytes(length: int) -> bytes:
     """
-    Return a bytes-like object of length ``size`` containing random bytes
+    Return a bytes-like object of length ``length`` containing random bytes
     from a cryptographically suitable source of randomness.
 
-    :param size: Length of bytes-like object to return.
+    :param length: Length of bytes-like object to return.
 
+    >>> len(randombytes(14)) == 14
+    True
     >>> r1 = randombytes(14)
     >>> r2 = randombytes(14)
     >>> r1 == r2 # Chances of equality succeeding are 1/(2^42).
     False
+
+    An exception is raised if the input is not valid:
+
+    >>> randombytes('abc')
+    Traceback (most recent call last):
+      ...
+    TypeError: length must be an integer
+    >>> randombytes(-1)
+    Traceback (most recent call last):
+      ...
+    TypeError: length must be a non-negative integer
     """
-    buf = _buffer_create(size)
-    _sodium.randombytes(buf, size)
+    if not isinstance(length, int):
+        raise TypeError('length must be an integer')
+
+    if length < 0:
+        raise ValueError('length must be a non-negative integer')
+
+    buf = _buffer_create(length)
+    _sodium.randombytes(buf, length)
     return buf.raw
 
-def randombytes_buf_deterministic(size: int, seed: bytes) -> bytes:
+def randombytes_buf_deterministic(length: int, seed: bytes) -> bytes:
     """
-    Return a bytes-like object of length ``size`` containing pseudorandom
+    Return a bytes-like object of length ``length`` containing pseudorandom
     bytes that have been deterministically generated from the supplied seed
     (a byte vector of length :obj:`randombytes_SEEDBYTES`).
 
-    :param size: Length of bytes-like object to return.
+    :param length: Length of bytes-like object to return.
     :param seed: Seed to use for generating pseudorandom bytes.
 
     The example below shows that the first ``32`` bytes from the stream of
@@ -123,12 +143,33 @@ def randombytes_buf_deterministic(size: int, seed: bytes) -> bytes:
     True
     >>> r1 == r2[:32]
     True
-    """
-    if len(seed) != randombytes_SEEDBYTES:
-        raise ValueError('seed must be of length 32') # pragma: no cover
 
-    buf = _buffer_create(size)
-    _sodium.randombytes_buf_deterministic(buf, size, seed)
+    An exception is raised if an input is not valid:
+
+    >>> randombytes_buf_deterministic('abc', b'\x70'*32)
+    Traceback (most recent call last):
+      ...
+    TypeError: length must be an integer
+    >>> randombytes_buf_deterministic(-1, b'\x70'*32)
+    Traceback (most recent call last):
+      ...
+    TypeError: length must be a non-negative integer
+    """
+    if not isinstance(length, int):
+        raise TypeError('length must be an integer')
+
+    if length < 0:
+        raise ValueError('length must be a non-negative integer')
+
+    well_typed = isinstance(seed, bytes)
+    if not well_typed or len(seed) != randombytes_SEEDBYTES:
+        raise (ValueError if well_typed else TypeError)(
+            'seed must be a bytes object of length ' +
+            str(randombytes_SEEDBYTES)
+        ) # pragma: no cover
+
+    buf = _buffer_create(length)
+    _sodium.randombytes_buf_deterministic(buf, length, seed)
     return buf.raw
 
 def crypto_core_ristretto255_is_valid_point(p: bytes) -> bool:
@@ -587,7 +628,7 @@ def crypto_scalarmult_ristretto255_base_allow_scalar_zero(s: bytes) -> bytes:
 
     q = _crypto_scalarmult_ristretto255_point_new()
 
-    # If ``-1``, then ``q`` remains cleared (``b'\0'*32``).
+    # If the below returns ``-1``, then ``q`` remains cleared (``b'\0'*32``).
     _sodium.crypto_scalarmult_ristretto255_base(q, s)
     return q.raw
 
@@ -641,8 +682,7 @@ def crypto_scalarmult_ristretto255(s: bytes, p: bytes) -> bytes:
 @safe
 def crypto_scalarmult_ristretto255_allow_scalar_zero(
         s: bytes, p: bytes
-    ) -> bytes: # pragma: no cover
-    # The decorator recompiles this function body.
+    ) -> bytes: # pragma: no cover # The decorator recompiles this function body.
     """
     Compute and return the product (represented as a byte vector of length
     :obj:`crypto_scalarmult_ristretto255_BYTES`) of a *clamped* integer
@@ -698,7 +738,9 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(
 
     safe # pylint: disable=pointless-statement # Marker for ``barriers`` decorator ``safe``.
     if not crypto_core_ristretto255_is_valid_point(p):
-        raise TypeError('second input must represent a valid point')
+        raise TypeError(
+            'second input must represent a valid point'
+        ) # pragma: no cover
 
     q = _crypto_scalarmult_ristretto255_point_new()
 
@@ -706,7 +748,7 @@ def crypto_scalarmult_ristretto255_allow_scalar_zero(
     _sodium.crypto_scalarmult_ristretto255(q, s, p)
     return q.raw
 
-def _sodium_init():
+def _sodium_init() -> None:
     """
     Checks that libsodium is not already initialized, initializes it,
     and defines globals whose definitions depend on functions exported
