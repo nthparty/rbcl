@@ -163,7 +163,7 @@ Remove any old build/distribution files. Then, package the source into a distrib
 .. code-block:: bash
 
     rm -rf build dist src/*.egg-info
-    python -m build --sdist --wheel .
+    python -m build --sdist .
 
 Next, navigate to the appropriate GitHub Actions run of the workflow defined in ``lint-test-cover-docs-build-upload.yml``. Click on the workflow and scroll down to the **Artifacts** panel. Download the archive files to the ``dist`` directory. Unzip all the archive files so that only the ``*.whl`` files remain:
 
