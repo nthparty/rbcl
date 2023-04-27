@@ -127,7 +127,7 @@ jobs:
           name: "${{ env.WHEELNAME }}"
           path: rbcl-wheelhouse/
   macos-arm:
-    runs-on: macos-11
+    runs-on: [self-hosted, macos, ARM64]
     strategy:
       matrix:
         python:
