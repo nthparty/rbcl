@@ -8,11 +8,11 @@ jobs:
     strategy:
       matrix:
         python:
-          - {version: "3.7", version-abi: "cp37", version-abi-suffix: "cp37m"}
-          - {version: "3.8", version-abi: "cp38", version-abi-suffix: "cp38"}
-          - {version: "3.9", version-abi: "cp39", version-abi-suffix: "cp39"}
-          - {version: "3.10", version-abi: "cp310", version-abi-suffix: "cp310"}
-          - {version: "3.11", version-abi: "cp311", version-abi-suffix: "cp311"}
+          - {version: '3.7', version-abi: 'cp37', version-abi-suffix: 'cp37m'}
+          - {version: '3.8', version-abi: 'cp38', version-abi-suffix: 'cp38'}
+          - {version: '3.9', version-abi: 'cp39', version-abi-suffix: 'cp39'}
+          - {version: '3.10', version-abi: 'cp310', version-abi-suffix: 'cp310'}
+          - {version: '3.11', version-abi: 'cp311', version-abi-suffix: 'cp311'}
     name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for manylinux2014_x86_64
     env:
       WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64
@@ -70,7 +70,7 @@ jobs:
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "${{ env.WHEELNAME }}"
+          name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse/
   macos:
     runs-on: macos-latest
@@ -80,9 +80,9 @@ jobs:
           - {version: '3.7', version-abi: 'cp37', version-url: '3.7.9'}
           - {version: '3.8', version-abi: 'cp38', version-url: '3.8.9'}
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
-    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9"
+    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 10.9
     env:
-      WHEELNAME: "rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64"
+      WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-macosx_10_9_x86_64
     steps:
       - uses: actions/checkout@v3
       - name: Download libsodium source tree archive.
@@ -106,7 +106,8 @@ jobs:
               venv/bin/python -m build --wheel && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
-        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
+        run: |
+          venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
@@ -126,7 +127,7 @@ jobs:
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "${{ env.WHEELNAME }}"
+          name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse/
   macos-arm:
     runs-on: [self-hosted, macos, ARM64]
@@ -136,9 +137,9 @@ jobs:
           - {version: '3.9', version-abi: 'cp39', version-url: '3.9.9'}
           - {version: '3.10', version-abi: 'cp310', version-url: '3.10.6'}
           - {version: '3.11', version-abi: 'cp311', version-url: '3.11.3'}
-    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM"
+    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for macOS 11 ARM
     env:
-      WHEELNAME: "rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2"
+      WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-macosx_10_10_universal2
     steps:
       - uses: actions/checkout@v3
       - name: Download libsodium source tree archive.
@@ -162,7 +163,8 @@ jobs:
               venv/bin/python -m build --wheel && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
-        run: venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
+        run: |
+          venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
@@ -179,10 +181,10 @@ jobs:
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
-          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/"${{ env.WHEELNAME }}".whl
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "${{ env.WHEELNAME }}"
+          name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse/
   windows:
     runs-on: windows-latest
@@ -192,14 +194,14 @@ jobs:
           - {version: 'win32', arch: 'x86', arch-sodium: 'Win32', arch-vs: 'x86'}
           - {version: 'win_amd64', arch: 'x64', arch-sodium: 'x64', arch-vs: 'amd64'}
         python:
-          - {version: "3.7", version-abi: "cp37"}
-          - {version: "3.8", version-abi: "cp38"}
-          - {version: "3.9", version-abi: "cp39"}
-          - {version: "3.10", version-abi: "cp310"}
-          - {version: "3.11", version-abi: "cp311"}
-    name: "Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}"
+          - {version: '3.7', version-abi: 'cp37'}
+          - {version: '3.8', version-abi: 'cp38'}
+          - {version: '3.9', version-abi: 'cp39'}
+          - {version: '3.10', version-abi: 'cp310'}
+          - {version: '3.11', version-abi: 'cp311'}
+    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}
     env:
-      WHEELNAME: "rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}"
+      WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}
       INCLUDE: C:/libsodium/include
       LIB: C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v142/dynamic/
     steps:
@@ -227,7 +229,8 @@ jobs:
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
         shell: cmd
       - name: Test wheel installation.
-        run: pip install -f wheelhouse rbcl --no-index --force-reinstall --no-dependencies
+        run: |
+          pip install -f wheelhouse rbcl --no-index --force-reinstall --no-dependencies
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           python -m pip install -U pip .[lint,test]
@@ -244,8 +247,8 @@ jobs:
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
-          move wheelhouse\rbcl*.whl rbcl-wheelhouse\"${{ env.WHEELNAME }}".whl
+          move wheelhouse\rbcl*.whl rbcl-wheelhouse\${{ env.WHEELNAME }}.whl
       - uses: actions/upload-artifact@v1
         with:
-          name: "${{ env.WHEELNAME }}"
+          name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse\
