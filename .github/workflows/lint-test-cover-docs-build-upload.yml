@@ -202,14 +202,14 @@ jobs:
     name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.version-abi }} for Windows ${{ matrix.windows.arch }}
     env:
       WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.version-abi }}-abi3-${{ matrix.windows.version }}
-      INCLUDE: C:/libsodium/include
-      LIB: C:/libsodium/${{ matrix.windows.arch-sodium }}/release/v143/dynamic/
+      INCLUDE: C:\libsodium\include
+      LIB: C:\libsodium\${{ matrix.windows.arch-sodium }}\Release\v143\dynamic\
     steps:
       - uses: actions/checkout@v3
       - name: Download and extract libsodium dynamic library file.
         run: |
-          wget -O c:\libsodium-1.0.18-msvc.zip https://download.libsodium.org/libsodium/releases/libsodium-1.0.18-msvc.zip
-          Expand-Archive c:\libsodium-1.0.18-msvc.zip -DestinationPath c:\
+          wget -O C:\libsodium-1.0.18-msvc.zip https://download.libsodium.org/libsodium/releases/libsodium-1.0.18-msvc.zip
+          Expand-Archive C:\libsodium-1.0.18-msvc.zip -DestinationPath C:\
         shell: powershell
       - name: Install Python.
         uses: actions/setup-python@v4
@@ -225,18 +225,20 @@ jobs:
           mkdir wheelhouse
           call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -no_logo -arch=${{ matrix.windows.arch-vs }}
           python -m build --wheel
-          mv dist/rbcl*.whl wheelhouse
-          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
+          mv dist\rbcl*.whl wheelhouse
+          cp build\lib*\rbcl\_sodium.py src\rbcl\_sodium.py
         shell: cmd
       - name: Test wheel installation.
         run: |
           pip install -f wheelhouse rbcl --no-index --force-reinstall --no-dependencies
+        shell: bash
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           python -m pip install -U pip .[lint,test]
           python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
           python src/rbcl/rbcl.py -v # Run doctests.
           python -m pytest # Run tests.
+        shell: bash
       - name: Test auto-generation of documentation.
         run: |
           python -m pip install -U .[docs]
@@ -244,10 +246,12 @@ jobs:
           sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py
           make html
           cd ..
+        shell: bash
       - name: Upload wheel file.
         run: |
           mkdir rbcl-wheelhouse
           move wheelhouse\rbcl*.whl rbcl-wheelhouse\${{ env.WHEELNAME }}.whl
+        shell: cmd 
       - uses: actions/upload-artifact@v1
         with:
           name: ${{ env.WHEELNAME }}
