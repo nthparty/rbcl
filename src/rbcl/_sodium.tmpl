@@ -16,12 +16,12 @@ sodium_bs = bytes.fromhex('{{{SODIUM_HEX}}}') # pylint: disable=line-too-long
 which_os = platform.system()
 
 # Generate a temporary file on disk and write the libsodium binary to it.
-LIB_EXT = ".pyd" if which_os == "Windows" else ".so"
+LIB_EXT = '.pyd' if which_os == 'Windows' else '.so'
 lib_path = tempfile.NamedTemporaryFile( # pylint: disable=consider-using-with
 	suffix=LIB_EXT,
 	delete=False
 ).name
-sodium_tmp = open(lib_path, "wb") # pylint: disable=consider-using-with
+sodium_tmp = open(lib_path, 'wb') # pylint: disable=consider-using-with
 sodium_tmp.write(sodium_bs)
 
 # Close temporary file to avoid multiprocess access error on Windows.

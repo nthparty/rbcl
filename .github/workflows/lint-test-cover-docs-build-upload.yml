@@ -251,7 +251,7 @@ jobs:
         run: |
           mkdir rbcl-wheelhouse
           move wheelhouse\rbcl*.whl rbcl-wheelhouse\${{ env.WHEELNAME }}.whl
-        shell: cmd 
+        shell: cmd
       - uses: actions/upload-artifact@v1
         with:
           name: ${{ env.WHEELNAME }}
