@@ -12,7 +12,7 @@ import subprocess
 import tarfile
 import errno
 import urllib.request
-from distutils.sysconfig import get_config_vars # pylint: disable=deprecated-module
+from distutils.sysconfig import get_config_vars # pylint: disable=import-error,deprecated-module
 import pystache
 from setuptools.command.install import install
 
