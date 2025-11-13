@@ -365,7 +365,7 @@ def crypto_core_ristretto255_scalar_reduce(s: bytes) -> bytes:
     In the example below, a large integer representing a scalar is reduced to
     a valid scalar:
 
-    >>> x = bytes.fromhex('FF' * 32)
+    >>> x = bytes.fromhex('FF' * 64)
     >>> s = crypto_core_ristretto255_scalar_reduce(x)
     >>> p = crypto_core_ristretto255_random()
     >>> masked = crypto_scalarmult_ristretto255(s, p)
@@ -382,7 +382,7 @@ def crypto_core_ristretto255_scalar_reduce(s: bytes) -> bytes:
     ... except TypeError as e:
     ...     str(e) == (
     ...         'scalar must be a bytes object of length ' +
-    ...         str(crypto_core_ristretto255_SCALARBYTES)
+    ...         str(crypto_core_ristretto255_NONREDUCEDSCALARBYTES)
     ...     )
     True
     >>> try:
@@ -390,15 +390,15 @@ def crypto_core_ristretto255_scalar_reduce(s: bytes) -> bytes:
     ... except ValueError as e:
     ...     str(e) == (
     ...         'scalar must be a bytes object of length ' +
-    ...         str(crypto_core_ristretto255_SCALARBYTES)
+    ...         str(crypto_core_ristretto255_NONREDUCEDSCALARBYTES)
     ...     )
     True
     """
     well_typed = isinstance(s, bytes)
-    if not well_typed or len(s) != crypto_core_ristretto255_SCALARBYTES:
+    if not well_typed or len(s) != crypto_core_ristretto255_NONREDUCEDSCALARBYTES:
         raise (ValueError if well_typed else TypeError)(
             'scalar must be a bytes object of length ' +
-            str(crypto_core_ristretto255_SCALARBYTES)
+            str(crypto_core_ristretto255_NONREDUCEDSCALARBYTES)
         )
 
     r = _crypto_core_ristretto255_scalar_new()
@@ -622,7 +622,7 @@ def crypto_scalarmult_ristretto255_base(s: bytes) -> bytes:
     """
     Compute and return the product (represented as a byte vector of length
     :obj:`crypto_scalarmult_ristretto255_BYTES`) of a standard group element
-    and a scalar ``s``. 
+    and a scalar ``s``.
 
     :param s: Byte vector of length :obj:`crypto_scalarmult_ristretto255_SCALARBYTES`
         representing a scalar.
