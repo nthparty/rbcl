@@ -65,7 +65,7 @@ jobs:
         run: |
           mkdir rbcl-wheelhouse
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse/
@@ -122,7 +122,7 @@ jobs:
         run: |
           mkdir rbcl-wheelhouse
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse/
@@ -179,7 +179,7 @@ jobs:
         run: |
           mkdir rbcl-wheelhouse
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse/
@@ -249,7 +249,7 @@ jobs:
           mkdir rbcl-wheelhouse
           move wheelhouse\rbcl*.whl rbcl-wheelhouse\${{ env.WHEELNAME }}.whl
         shell: cmd
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse\
