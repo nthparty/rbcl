@@ -1,27 +1,37 @@
-name: lint-test-cover-docs-build-upload
+name: build-lint-test-cover-docs-upload
 on:
-  push
+  push:
+    branches:
+      - '**'
+  workflow_call: # If invoked by build-publish-sign-release workflow.
 jobs:
   manylinux:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os-arch.os }}
     strategy:
       matrix:
+        os-arch:
+          - {os: 'ubuntu-24.04', arch: 'x64', suffix: 'x86_64'}
+          - {os: 'ubuntu-24.04-arm', arch: 'arm64', suffix: 'aarch64'}
         python:
-          - {version: '3.7', abi: 'cp37'}
-          - {version: '3.8', abi: 'cp38'}
           - {version: '3.9', abi: 'cp39'}
           - {version: '3.10', abi: 'cp310'}
           - {version: '3.11', abi: 'cp311'}
-    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} for manylinux2014_x86_64
+          - {version: '3.12', abi: 'cp312'}
+          - {version: '3.13', abi: 'cp313'}
+          - {version: '3.14', abi: 'cp314'}
+    name: >
+      Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }}
+      for manylinux2014_${{ matrix.os-arch.suffix }}
     env:
-      WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64
+      WHEELNAME_PY: ${{ github.ref_name }}-${{ matrix.python.abi }}
+      WHEELNAME_OS: abi3-manylinux_2_17_${{ matrix.os-arch.suffix }}.manylinux2014_${{ matrix.os-arch.suffix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Python.
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python.version }}
-          architecture: x64
+          architecture: ${{ matrix.os-arch.arch }}
       - name: Download libsodium source tree archive.
         run: |
           wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
@@ -43,14 +53,15 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           pip install -U .[lint,test]
-          python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
+          python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py \
+              --disable=duplicate-code # Check against linting rules.
           python src/rbcl/rbcl.py -v # Run doctests.
           python -m pytest # Run tests.
       - name: Publish coverage results.
         run: |
           pip install -U .[coveralls]
           python -m coveralls --service=github # Submit to coveralls.
-        if: matrix.python.version == '3.11'
+        if: matrix.python.version == '3.12'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
@@ -61,33 +72,112 @@ jobs:
           sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py
           make html
           cd ..
-      - name: Upload wheel file.
+      - name: Rename wheel file.
         run: |
           mkdir rbcl-wheelhouse
-          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
-      - uses: actions/upload-artifact@v4
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/rbcl-${{ env.WHEELNAME_PY }}-${{ env.WHEELNAME_OS }}.whl
+      - name: Upload wheel file.
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.WHEELNAME }}
+          name: rbcl-${{ env.WHEELNAME_PY }}-${{ env.WHEELNAME_OS }}
+          path: rbcl-wheelhouse/
+  musllinux:
+    runs-on: ${{ matrix.os-arch.os }}
+    strategy:
+      matrix:
+        os-arch:
+          - {os: 'ubuntu-24.04', arch: 'x86_64'}
+          - {os: 'ubuntu-24.04-arm', arch: 'aarch64'}
+        python:
+          - {version: '3.9', abi: 'cp39'}
+          - {version: '3.10', abi: 'cp310'}
+          - {version: '3.11', abi: 'cp311'}
+          - {version: '3.12', abi: 'cp312'}
+          - {version: '3.13', abi: 'cp313'}
+          - {version: '3.14', abi: 'cp314'}
+    name: >
+      Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} 
+      for musllinux_1_2_${{ matrix.os-arch.arch }}
+    env:
+      WHEELNAME_PY: ${{ github.ref_name }}-${{ matrix.python.abi }}
+      WHEELNAME_OS: abi3-musllinux_1_2_${{ matrix.os-arch.arch }}
+      CIBW_BUILD_VERBOSITY: 1
+      CIBW_ARCHS_LINUX: ${{ matrix.os-arch.arch }}
+      CIBW_BUILD: ${{ matrix.python.abi }}-musllinux_${{ matrix.os-arch.arch }}
+      CIBW_SKIP: '*-manylinux_*'
+      CIBW_PROJECT_REQUIRES_PYTHON: '~=${{ matrix.python.version }}'
+      CIBW_ENVIRONMENT: LIBSODIUM_MAKE_ARGS="-j$(nproc)"
+      CIBW_BEFORE_ALL: >
+        pip install .[build] -v
+      CIBW_REPAIR_WHEEL_COMMAND: ''
+      CIBW_TEST_EXTRAS: 'lint,test,docs'
+      CIBW_BEFORE_TEST: >
+        cd {project} &&
+        cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py &&
+        pip3 install pystache~=0.6 setuptools &&
+        apk add wget &&
+        wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz &&
+        mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
+      CIBW_TEST_COMMAND: >
+        cd {project} &&
+        python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code &&
+        python src/rbcl/rbcl.py -v &&
+        python -m pytest &&
+        cd docs &&
+        sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py ** &&
+        make html
+      CIBW_DEBUG_TRACEBACK: True
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build wheel file.
+        uses: pypa/cibuildwheel@v3.2.0
+        with:
+          output-dir: wheelhouse
+      - name: Rename wheel file.
+        run: |
+          mkdir rbcl-wheelhouse
+          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/rbcl-${{ env.WHEELNAME_PY }}-${{ env.WHEELNAME_OS }}.whl
+      - name: Upload wheel file.
+        uses: actions/upload-artifact@v4
+        with:
+          name: rbcl-${{ env.WHEELNAME_PY }}-${{ env.WHEELNAME_OS }}
           path: rbcl-wheelhouse/
   macos:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os-arch.os }}
     strategy:
       matrix:
+        include:
+          - os-arch:
+              os: 'macos-13'
+              arch: '10_9_x86_64'
+              suffix: '10.9 Intel'
+              flags: 'CFLAGS="-mmacosx-version-min=10.9 -march=core2"'
+            python: {version: '3.9', abi: 'cp39', url: '3.9.13/python-3.9.13-macosx10.9'}
+        os-arch:
+          - {os: 'macos-13', arch: '11_0_x86_64', suffix: '11 Intel', flags: ''}
+          - {os: 'macos-15', arch: '11_0_arm64', suffix: '11 ARM', flags: 'CFLAGS="-arch arm64" ARCHFLAGS="-arch arm64"'}
         python:
-          - {version: '3.7', abi: 'cp37', url: '3.7.9'}
-          - {version: '3.8', abi: 'cp38', url: '3.8.9'}
-          - {version: '3.9', abi: 'cp39', url: '3.9.9'}
-    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} for macOS 10.9
+          - {version: '3.9', abi: 'cp39', url: '3.9.13/python-3.9.13-macos11'}
+          - {version: '3.10', abi: 'cp310', url: '3.10.11/python-3.10.11-macos11'}
+          - {version: '3.11', abi: 'cp311', url: '3.11.9/python-3.11.9-macos11'}
+          - {version: '3.12', abi: 'cp312', url: '3.12.10/python-3.12.10-macos11'}
+          - {version: '3.13', abi: 'cp313', url: '3.13.7/python-3.13.7-macos11'}
+          - {version: '3.14', abi: 'cp314', url: '3.14.1/python-3.14.1-macos11'}
+    name: >
+      Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }}
+      for macOS ${{ matrix.os-arch.suffix }}
     env:
-      WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-abi3-macosx_10_9_x86_64
+      WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-abi3-macosx_${{ matrix.os-arch.arch }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Python.
         run: |
-          curl "https://www.python.org/ftp/python/${{ matrix.python.url }}/python-${{ matrix.python.url }}-macosx10.9.pkg" -o python.pkg
+          curl "https://www.python.org/ftp/python/${{ matrix.python.url }}.pkg" -o python.pkg
           sudo installer -pkg python.pkg -target /
-          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m pip install -U virtualenv
-          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 \
+              -m pip install -U virtualenv
+          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 \
+              -m virtualenv venv
       - name: Download libsodium source tree archive.
         run: |
           wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
@@ -99,7 +189,7 @@ jobs:
         run: |
           mkdir wheelhouse
           rm -f dist/*.*
-          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" CFLAGS="-mmacosx-version-min=10.9 -march=core2" \
+          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" ${{ matrix.os-arch.flags }} \
               venv/bin/python -m build --wheel && mv dist/rbcl*.whl wheelhouse
           cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
       - name: Test wheel installation.
@@ -108,7 +198,8 @@ jobs:
       - name: Lint and test module (and compiled libsodium shared library file).
         run: |
           venv/bin/pip install -U pip .[lint,test]
-          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
+          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py \
+              --disable=duplicate-code # Check against linting rules.
           venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
           venv/bin/python -m pytest # Run tests.
       - name: Test auto-generation of documentation.
@@ -118,93 +209,37 @@ jobs:
           ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py
           make html SPHINXBUILD='../venv/bin/sphinx-build'
           cd ..
-      - name: Upload wheel file.
+      - name: Rename wheel file.
         run: |
           mkdir rbcl-wheelhouse
           mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.WHEELNAME }}
-          path: rbcl-wheelhouse/
-  macos-arm:
-    runs-on: [self-hosted, macos, ARM64]
-    strategy:
-      matrix:
-        python:
-          - {version: '3.9', abi: 'cp39', url: '3.9.9'}
-          - {version: '3.10', abi: 'cp310', url: '3.10.6'}
-          - {version: '3.11', abi: 'cp311', url: '3.11.3'}
-    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} for macOS 11 ARM
-    env:
-      WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-abi3-macosx_10_10_universal2
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Python.
-        run: |
-          curl "https://www.python.org/ftp/python/${{ matrix.python.url }}/python-${{ matrix.python.url }}-macos11.pkg" -o python.pkg
-          sudo installer -pkg python.pkg -target /
-          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m pip install -U virtualenv
-          /Library/Frameworks/Python.framework/Versions/${{ matrix.python.version }}/bin/python3 -m virtualenv venv
-      - name: Download libsodium source tree archive.
-        run: |
-          wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
-          mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
-      - name: Install Python dependencies for build process.
-        run: |
-          venv/bin/pip install -U pip .[build]
-      - name: Build wheel file.
-        run: |
-          mkdir wheelhouse
-          rm -f dist/*.*
-          LIBSODIUM_MAKE_ARGS="-j$(sysctl -n hw.ncpu)" MACOSX_DEPLOYMENT_TARGET="10.10" CFLAGS="-arch arm64" ARCHFLAGS="-arch arm64" _PYTHON_HOST_PLATFORM="macosx-10.9-universal2" \
-              venv/bin/python -m build --wheel && mv dist/rbcl*.whl wheelhouse
-          cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py
-      - name: Test wheel installation.
-        run: |
-          venv/bin/pip install -f wheelhouse --no-index --force-reinstall --no-dependencies rbcl
-      - name: Lint and test module (and compiled libsodium shared library file).
-        run: |
-          venv/bin/pip install -U pip .[lint,test]
-          venv/bin/python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code # Check against linting rules.
-          venv/bin/python src/rbcl/rbcl.py -v # Run doctests.
-          venv/bin/python -m pytest # Run tests.
-      - name: Test auto-generation of documentation.
-        run: |
-          venv/bin/pip install -U .[docs]
-          cd docs
-          ../venv/bin/sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py
-          make html SPHINXBUILD='../venv/bin/sphinx-build'
-          cd ..
       - name: Upload wheel file.
-        run: |
-          mkdir rbcl-wheelhouse
-          mv wheelhouse/rbcl*.whl rbcl-wheelhouse/${{ env.WHEELNAME }}.whl
-      - uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse/
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2025
     strategy:
       matrix:
         windows:
-          - {version: 'win32', arch: 'x86', arch-sodium: 'Win32', arch-vs: 'x86'}
           - {version: 'win_amd64', arch: 'x64', arch-sodium: 'x64', arch-vs: 'amd64'}
         python:
-          - {version: '3.7', abi: 'cp37'}
-          - {version: '3.8', abi: 'cp38'}
           - {version: '3.9', abi: 'cp39'}
           - {version: '3.10', abi: 'cp310'}
           - {version: '3.11', abi: 'cp311'}
+          - {version: '3.12', abi: 'cp312'}
+          - {version: '3.13', abi: 'cp313'}
+          - {version: '3.14', abi: 'cp314'}
     name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} for Windows ${{ matrix.windows.arch }}
     env:
       WHEELNAME: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-abi3-${{ matrix.windows.version }}
       INCLUDE: C:\libsodium\include
       LIB: C:\libsodium\${{ matrix.windows.arch-sodium }}\Release\v142\dynamic\
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Python.
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python.version }}
           architecture: ${{ matrix.windows.arch }}
@@ -244,184 +279,13 @@ jobs:
           make html
           cd ..
         shell: bash
-      - name: Upload wheel file.
+      - name: Rename wheel file.
         run: |
           mkdir rbcl-wheelhouse
           move wheelhouse\rbcl*.whl rbcl-wheelhouse\${{ env.WHEELNAME }}.whl
         shell: cmd
-      - uses: actions/upload-artifact@v4
+      - name: Upload wheel file.
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.WHEELNAME }}
           path: rbcl-wheelhouse\
-
-  manylinux2014_aarch64:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python:
-          - { version: '3.8', abi: 'cp38' }
-          - { version: '3.9', abi: 'cp39' }
-          - { version: '3.10', abi: 'cp310' }
-          - { version: '3.11', abi: 'cp311' }
-          - { version: '3.12', abi: 'cp312' }
-
-    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} for manylinux2014_aarch64
-    env:
-      CIBW_BUILD_VERBOSITY: 1
-      CIBW_ARCHS_LINUX: "aarch64"
-      CIBW_BUILD: "${{ matrix.python.abi }}-manylinux_aarch64"
-      CIBW_PROJECT_REQUIRES_PYTHON: ">=${{ matrix.python.version }}"
-      CIBW_ENVIRONMENT: LIBSODIUM_MAKE_ARGS="-j$(nproc)"
-      CIBW_BEFORE_ALL: >
-        pip install .[build] -v
-      CIBW_REPAIR_WHEEL_COMMAND: ""
-      CIBW_TEST_EXTRAS: "lint,test,docs"
-      CIBW_BEFORE_TEST: >
-        cd {project} &&
-        cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py &&
-        pip3 install pystache~=0.6 setuptools &&
-        yum install wget -y &&
-        wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz &&
-        mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
-      CIBW_TEST_COMMAND: >
-        cd {project} &&
-        python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code &&
-        python src/rbcl/rbcl.py -v &&
-        python -m pytest &&
-        cd docs &&
-        sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py ** &&
-        make html
-      CIBW_DEBUG_TRACEBACK: True
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.20.0
-        with:
-          output-dir: dist
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-manylinux2014_aarch64
-          path: dist/*.whl
-
-
-  musllinux_1_2_aarch64:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python:
-          - { version: '3.8', abi: 'cp38' }
-          - { version: '3.9', abi: 'cp39' }
-          - { version: '3.10', abi: 'cp310' }
-          - { version: '3.11', abi: 'cp311' }
-          - { version: '3.12', abi: 'cp312' }
-
-    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} for musllinux_1_2_aarch64
-    env:
-      CIBW_BUILD_VERBOSITY: 1
-      CIBW_ARCHS_LINUX: "aarch64"
-      CIBW_BUILD: "${{ matrix.python.abi }}-musllinux_aarch64"
-      CIBW_PROJECT_REQUIRES_PYTHON: ">=${{ matrix.python.version }}"
-      CIBW_ENVIRONMENT: LIBSODIUM_MAKE_ARGS="-j$(nproc)"
-      CIBW_BEFORE_ALL: >
-        pip install .[build] -v
-      CIBW_REPAIR_WHEEL_COMMAND: ""
-      CIBW_TEST_EXTRAS: "lint,test,docs"
-      CIBW_BEFORE_TEST: >
-        cd {project} &&
-        cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py &&
-        pip3 install pystache~=0.6 setuptools &&
-        apk add wget &&
-        wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz &&
-        mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
-      CIBW_TEST_COMMAND: >
-        cd {project} &&
-        python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code &&
-        python src/rbcl/rbcl.py -v &&
-        python -m pytest &&
-        cd docs &&
-        sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py ** &&
-        make html
-      CIBW_DEBUG_TRACEBACK: True
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.20.0
-        with:
-          output-dir: dist
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-musllinux_1_2_aarch64
-          path: dist/*.whl
-
-
-
-  musllinux_1_2_x86_64:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python:
-          - { version: '3.8', abi: 'cp38' }
-          - { version: '3.9', abi: 'cp39' }
-          - { version: '3.10', abi: 'cp310' }
-          - { version: '3.11', abi: 'cp311' }
-          - { version: '3.12', abi: 'cp312' }
-
-    name: Python ${{ matrix.python.version }} with ABI ${{ matrix.python.abi }} for musllinux_1_2_x86_64
-    env:
-      CIBW_BUILD_VERBOSITY: 1
-      CIBW_ARCHS_LINUX: "x86_64"
-      CIBW_BUILD: "${{ matrix.python.abi }}-musllinux_x86_64"
-      CIBW_PROJECT_REQUIRES_PYTHON: ">=${{ matrix.python.version }}"
-      CIBW_ENVIRONMENT: LIBSODIUM_MAKE_ARGS="-j$(nproc)"
-      CIBW_BEFORE_ALL: >
-        pip install .[build] -v
-      CIBW_REPAIR_WHEEL_COMMAND: ""
-      CIBW_TEST_EXTRAS: "lint,test,docs"
-      CIBW_BEFORE_TEST: >
-        cd {project} &&
-        cp build/lib*/rbcl/_sodium.py src/rbcl/_sodium.py &&
-        pip3 install pystache~=0.6 setuptools &&
-        apk add wget &&
-        wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz &&
-        mv libsodium-1.0.18.tar.gz src/rbcl/libsodium.tar.gz
-      CIBW_TEST_COMMAND: >
-        cd {project} &&
-        python -m pylint rbcl src/rbcl/_sodium.tmpl src/rbcl/_sodium_build.py --disable=duplicate-code &&
-        python src/rbcl/rbcl.py -v &&
-        python -m pytest &&
-        cd docs &&
-        sphinx-apidoc -f -E --templatedir=_templates -o _source .. ../src/rbcl/_sodium_build.py ** &&
-        make html
-      CIBW_DEBUG_TRACEBACK: True
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.20.0
-        with:
-          output-dir: dist
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: rbcl-${{ github.ref_name }}-${{ matrix.python.abi }}-musllinux_1_2_x86_64
-          path: dist/*.whl
